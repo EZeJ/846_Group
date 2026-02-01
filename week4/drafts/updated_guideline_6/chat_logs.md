@@ -1,6 +1,6 @@
 # USING CHAT 0:
 
-USER: Who argues that performance problems are caused by indexing, and who argues they are caused by schema design choices? Quote the relevant statements.
+USER: Who argues that performance problems are caused by indexing, and who argues they are caused by schema design choices? Quote the relevant statements. + UPLOADED FILE 0
 
 GitHub Copilot: Tom argues that performance problems are caused by indexing, while Jerry argues they are caused by schema design choices.
 
@@ -21,7 +21,7 @@ Jerry (schema design choices):
 
 # USING CHAT 1:
 
-USER: Who argues that performance problems are caused by indexing, and who argues they are caused by schema design choices? Quote the relevant statements.
+USER: Who argues that performance problems are caused by indexing, and who argues they are caused by schema design choices? Quote the relevant statements. + UPLOADED FILE 1
 
 GitHub Copilot: Tom argues that performance problems are caused by indexing, while Jerry argues they are caused by schema design choices.
 
@@ -43,7 +43,7 @@ Relevant quotes:
 
 
 
-USER: Who argues that performance problems are caused by indexing, and who argues they are caused by schema design choices? Quote the relevant statements.
+USER: Who argues that performance problems are caused by indexing, and who argues they are caused by schema design choices? Quote the relevant statements. + UPLOADED FILE 2
 
 GitHub Copilot: In the conversation:
 
