@@ -1,0 +1,60 @@
+Tom: We need a proper relational schema. THIRD NORMAL FORM exists for a reason.
+Jerry: THIRD NORMAL FORM is fine in theory, but in production those JOIN chains are a nightmare.
+Tom: JOIN performance issues come from BAD INDEXING, not normalization.
+Jerry: No, they come from you adding FOREIGN KEY constraints everywhere.
+Tom: FOREIGN KEY constraints ensure DATA INTEGRITY.
+Jerry: They also make INSERT and UPDATE operations slower.
+Tom: Only if you don’t create proper INDEXES on the FOREIGN KEY columns.
+Jerry: We’re building a high-throughput system, not a textbook example of SQL purity.
+Tom: Without constraints, we’ll end up with orphaned rows and broken REFERENCES.
+Jerry: The APPLICATION LAYER can enforce relationships.
+Tom: APPLICATION LOGIC is not a substitute for DATABASE CONSTRAINTS.
+Jerry: It is when every SELECT requires five JOIN operations just to render a dashboard.
+Tom: That’s because you want denormalized tables with duplicated data.
+Jerry: Denormalization is a performance strategy, not a crime.
+Tom: It becomes a crime when UPDATE anomalies start corrupting data.
+Jerry: That’s why we use TRANSACTIONS.
+Tom: TRANSACTIONS don’t fix bad schema design.
+Jerry: Neither does blindly applying THIRD NORMAL FORM.
+Tom: It’s not blind. It prevents INSERT, UPDATE, and DELETE anomalies.
+Jerry: And causes query planners to choke on overly complex JOIN trees.
+Tom: QUERY PLANNERS exist to optimize JOINs.
+Jerry: Not when you force them to JOIN six tables to get a user profile.
+Tom: That’s because you split user data across multiple concerns, which is correct design.
+Jerry: It’s over-engineered. A single USER_PROFILE table would be faster.
+Tom: And full of NULL columns and duplicated address data.
+Jerry: Storage is cheap. CPU time during SELECT isn’t.
+Tom: Until you need consistent FOREIGN KEY enforcement across ten services.
+Jerry: We use MICROSERVICES. Each service owns its data.
+Tom: Then why are we even using a relational database if we’re ignoring RELATIONAL principles?
+Jerry: Because SQL is still better than a DOCUMENT STORE for analytics.
+Tom: Then treat it like SQL, not a KEY-VALUE store.
+Jerry: I’m treating it like a system that needs to handle 10K REQUESTS PER SECOND.
+Tom: That doesn’t justify removing PRIMARY KEY and FOREIGN KEY relationships.
+Jerry: I never said remove PRIMARY KEY.
+Tom: You literally proposed dropping FOREIGN KEY on ORDERS.USER_ID.
+Jerry: Because the JOIN between ORDERS and USERS is killing performance.
+Tom: That’s an INDEX issue, not a schema issue.
+Jerry: No, it’s because we normalized USERS into five separate tables.
+Tom: USER_CONTACT, USER_ADDRESS, USER_SETTINGS — those are distinct entities.
+Jerry: They could still live in one table with optional columns.
+Tom: That leads to sparse tables and wasted space.
+Jerry: Space is not our bottleneck. QUERY LATENCY is.
+Tom: Query latency comes from poor QUERY PLANS.
+Jerry: Query plans get worse when you JOIN everything.
+Tom: That’s what INDEXES are for.
+Jerry: Indexes slow down WRITES.
+Tom: This is a read-heavy system.
+Jerry: It’s both read and write heavy.
+Tom: Then we balance indexes, not remove CONSTRAINTS.
+Jerry: Constraints are part of the write overhead.
+Tom: They are also part of data correctness.
+Jerry: Data correctness can be validated before INSERT.
+Tom: That doesn’t protect against concurrent WRITE anomalies.
+Jerry: That’s what TRANSACTION ISOLATION LEVELS are for.
+Tom: You can’t rely on SERIALIZABLE everywhere.
+Jerry: Then don’t rely on FOREIGN KEYS everywhere either.
+Tom: So your plan is: fewer constraints, fewer JOINs, more duplicated data.
+Jerry: My plan is: faster queries, simpler schema, app-enforced rules.
+Tom: That’s how technical debt starts.
+Jerry: That’s how systems scale.
