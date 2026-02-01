@@ -184,3 +184,8 @@ Format: [paste schema]
 
 USER:
 [untrusted text plus task]
+
+
+---
+
+This guideline is created with GPT's help.
