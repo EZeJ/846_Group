@@ -57,4 +57,24 @@ For each requirement:
 - Fit criterion
 - Assumptions or open questions
 
+## Exercise 4: Fix a Username Validation Bug
+
+### Setup (policy excerpt)
+A username is valid if and only if:
+* The input is not None.
+* Leading and trailing whitespace is ignored (validation uses the trimmed value).
+* The length is between 3 and 20 characters (inclusive).
+* The first character is a letter.
+* Every character is alphanumeric or _.
+* The username does not end with _.
+
+### Task
+You are given an implementation of is_valid_username(username: str) -> bool that is intended to follow the policy above.
+Identify the mismatch between the policy and the code, and propose the minimal code change needed to make the implementation comply with the policy.
+
+### Required output format
+Bug: One sentence describing the violated rule.
+Failing example: One concrete input that demonstrates the bug.
+Fix: A minimal code snippet (only the new/changed lines).
+
 ---
