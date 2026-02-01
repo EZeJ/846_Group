@@ -22,7 +22,7 @@ Using the **Updated Guideline 6**, analyze which format made it easier for the m
 
 # Exercise 2: 
 ## Task Description
-Using the event information provided in `adoption_day_info_sheet.txt`, create **10 visitor FAQ Q&A pairs** to help attendees understand what to expect and how to prepare for the event.
+Using the event information provided in `resources/updated_guideline_4/adoption_day_info_sheet.txt`, create **10 visitor FAQ Q&A pairs** to help attendees understand what to expect and how to prepare for the event.
 
 ## Format
 Write each item in this exact format:
@@ -31,4 +31,4 @@ Write each item in this exact format:
 `A: …`
 
 ## Starter Code
-There is a txt document with the event decription in `adoption_day_info_sheet.txt`.
+There is a txt document with the event decription in `resources/updated_guideline_4/adoption_day_info_sheet`.
