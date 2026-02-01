@@ -19,6 +19,53 @@ Explain *why* this guideline is important, referencing readings and external sou
 **Example:**  
 Provide a brief illustrative example (code or pseudo-code if helpful).
 
+___
+
+# Updated Guideline 4 - Provide few-shot examples (Positive + Negative)
+
+## Description
+When specifying the desired behavior of a program or system, provide **two contrasting examples**:
+- **One good example** that follows the intended format and constraints, and  
+- **One bad example** that demonstrates a common failure mode to avoid.
+
+Explicitly state that the examples are to demonstrate **format + constraints**, not to lock the model into the example’s domain.
+
+## Reasoning
+Few-shot examples often improve LLM adherence to structure and output format, and examples can double as lightweight tests.  
+However, few-shot can fail when the model treats the example as a **template to copy** (e.g., repeating the same roles, actions, or domain details), rather than learning the underlying constraints.  
+
+Adding **one negative** and **one positive** example and **explicit invariants** shifts the model from **“copy this pattern”** to **“satisfy these rules,”** improving generalization across domains and preventing overfitting to the example scenario.
+
+
+## Example
+
+### Task
+List and describe the real-world constraints that may impact the project, including **budget**, **technical feasibility**, and **time limitations** outside of what was stated in the interviews.
+
+### Bad prompt
+List real-world constraints for the project.
+
+### Better prompt
+List **8–12** real-world constraints **outside of the interviews**. Use the exact bullet format:  
+`Constraint Type — Description — Impact — Mitigation/Next step`
+
+I will provide **two contrasting examples** (one good, one bad) to demonstrate **format + quality constraints only** (do not copy the example’s specific details).
+
+**Good example (follow this style; do not invent specifics):**  
+- `Budget — Budget cap unknown (TBD) — May limit scope to MVP — Confirm budget owner + prioritize features`
+
+**Bad example (do NOT do this; invented specifics / copied content):**  
+- `Budget — We have exactly $50k — Must use AWS + Stripe — Ship in 8 weeks`
+
+**Note:** The examples demonstrate **format + constraints only**. Do **not** reuse the example’s numbers/vendors/timelines unless they are explicitly given for this project.
+
+**Invariants (must hold for every bullet):**
+- Do **not** invent facts. If a number/date/vendor is unknown, use **TBD/unknown** and propose how to confirm it.
+- Each bullet must include both **Impact** and **Mitigation/Next step**.
+- Include at least one constraint each for **Budget**, **Time**, and **Technical feasibility**.
+- Keep constraints concrete and verifiable; avoid vague words unless measurable.
+
+ 
 ---
 
 ### Updated Guideline 6: Use Structured and Standardized Role Formatting for Multi-Speaker Content

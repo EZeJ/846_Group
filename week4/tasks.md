@@ -19,3 +19,16 @@ Folder: ```week4/drafts/updated_guideline_6```
 
 **Task:**
 Using the **Updated Guideline 6**, analyze which format made it easier for the model to track each speaker’s position?
+
+# Exercise 2: 
+## Task Description
+Using the event information provided in `adoption_day_info_sheet.txt`, create **10 visitor FAQ Q&A pairs** to help attendees understand what to expect and how to prepare for the event.
+
+## Format
+Write each item in this exact format:
+
+`Q: …`  
+`A: …`
+
+## Starter Code
+There is a txt document with the event decription in `adoption_day_info_sheet.txt`.
