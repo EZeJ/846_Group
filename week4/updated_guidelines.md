@@ -1,4 +1,4 @@
-# Week 4 Guidelines: [Topic Title]
+# Week 4 Guidelines: [Requirements]
 
 **Authors:** Liliana Hotsko, Alina Lytovchenko, Sofiia Tkach, Zesheng(Ethan) Jia
 
