@@ -4,19 +4,21 @@
 
 **Readings Assigned:**
 
--  Language models are few-shot learners [1]
+* Language models are few-shot learners [1]
 
--  Requirements Elicitation Follow-Up Question Generation [2]
+* Requirements Elicitation Follow-Up Question Generation [2]
 
--  Conversational automated program repair[3]
+*  Conversational automated program repair[3]
 
--  SpecGen: Automated Generation of Formal Pro-gram Specifications via Large Language Models[4]
+* SpecGen: Automated Generation of Formal Pro-gram Specifications via Large Language Models[4]
 
--  Keep the conversation going: Fixing 162 out of 337 bugs for $0.42 each using chatgpt[5]
+*  Keep the conversation going: Fixing 162 out of 337 bugs for $0.42 each using chatgpt[5]
+
+* Automated Repair of Programs from Large Language Models[6]
 
 ___
 
-# Updated Guideline 4 - Provide few-shot examples (Positive + Negative)
+# Updated Guideline 4: Provide few-shot examples (Positive + Negative)
 
 ## Description
 When specifying the desired behavior of a program or system, provide **two contrasting examples**:
@@ -63,7 +65,7 @@ I will provide **two contrasting examples** (one good, one bad) to demonstrate *
  
 ---
 
-### Updated Guideline 6: Use Structured and Standardized Role Formatting for Multi-Speaker Content
+# Updated Guideline 6: Use Structured and Standardized Role Formatting for Multi-Speaker Content
 
 **Description:**
 
@@ -372,11 +374,52 @@ Loophole Scan:
 - (bullets)
 ---
 
+# Updated Guideline 2: Converse with the LLM to analyze the problem 
 
+## Main Idea
 
+Use conversation for systems, workflows, policies, or user-facing features. Use precision for bugs, refactors, transformations, and calculations.
 
+## Description
+Engage in back-and-forth problem analysis only when the problem space is ambiguous, multi-stakeholder, or requirement-driven.
+For well-defined, local, or deterministic tasks, prefer a precise, constrained prompt that directly specifies the desired transformation or output.
 
+## Reasoning
+Conversational refinement is useful for revealing hidden assumptions and conflicts. However, it can create extra mental and computing burden in these situations:
+- The task has one correct answer
+- The scope is limited to a small piece of code or a rule
+- No trade-offs or business choices are at stake
+Studies [6] show that LLMs do better on narrowly defined tasks when:
+- Constraints are clear
+- The prompt limits options
+- Exploration is intentionally restricted
+This matches findings in prompt-minimalism for debugging and code repair, where shorter prompts work better than exploratory ones.
 
+## Example
+
+### Task
+The task was to correct a validation bug in an existing function.
+Specifically, the function incorrectly accepted usernames ending with an underscore (_).
+The goal was to update the logic so that such usernames are rejected, without changing any other validation rules or the function interface.
+
+### Bad prompt
+You are a senior requirements engineer.
+Analyze the broader user and business implications of username validation.
+Identify ambiguities in cultural naming, Unicode support, accessibility, and future scalability.
+Ask clarifying questions before evaluating the function.
+
+### Better prompt
+Review the following function.
+State exactly what usernames it accepts and rejects.
+Identify any logical edge cases or inconsistencies.
+Suggest minimal changes only if necessary to improve correctness.
+Do not introduce new rules.
+
+### Takeaways
+
+Conversation does not automatically produce insight.
+Precision is more valuable than exploration in well-defined tasks.
+In this case, the code itself defines the specification.
 
 ## 2. References
 
@@ -392,5 +435,6 @@ gram Specifications via Large Language Models,” Feb. 25, 2025, arXiv: arXiv:24
 10.48550/arXiv.2401.08807.
 [5] C. S. Xia and L. Zhang, “Keep the conversation going: Fixing 162 out of 337 bugs for $0.42
 each using chatgpt,” arXiv preprint arXiv:2304.00385, 2023.
+[6] Z. Fan, X. Gao, M. Mirchev, A. Roychoudhury, and S. H. Tan, “Automated Repair of Programs from Large Language Models,” arXiv preprint arXiv:2205.10583, 2022.
 
 ---
