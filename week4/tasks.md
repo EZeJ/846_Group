@@ -20,9 +20,11 @@ Folder: ```week4/drafts/updated_guideline_6```
 **Task:**
 Using the **Updated Guideline 6**, analyze which format made it easier for the model to track each speaker’s position?
 
+---
+
 # Exercise 2: 
 ## Task Description
-Using the event information provided in `resources/updated_guideline_4/adoption_day_info_sheet.txt`, create **10 visitor FAQ Q&A pairs** to help attendees understand what to expect and how to prepare for the event.
+Using the event information provided in `week4/drafts/updated_guideline_4/adoption_day_info_sheet.txt`, create **10 visitor FAQ Q&A pairs** to help attendees understand what to expect and how to prepare for the event.
 
 ## Format
 Write each item in this exact format:
@@ -31,4 +33,28 @@ Write each item in this exact format:
 `A: …`
 
 ## Starter Code
-There is a txt document with the event decription in `resources/updated_guideline_4/adoption_day_info_sheet`.
+There is a txt document with the event description in `week4/drafts/updated_guideline_4/adoption_day_info_sheet.txt`.
+
+---
+
+## Exercise 3: Compliance Prohibitions, Persona Pushes Loopholes
+
+### Setup (policy excerpt)
+You are given this compliance snippet for a child-focused messaging app:
+- The system must not allow sexual content involving minors.
+- Employees must not access message content unless (a) user explicitly requests support and (b) access is logged and approved.
+- The system must not reveal the exact reason a message was blocked in a way that enables bypass.
+- The system must not allow a blocked user to infer being blocked by timing differences.
+
+### Task
+Write 8 to 10 requirements with rationale and fit criteria.
+
+### Required output format
+For each requirement:
+- REQ-ID
+- Statement
+- Rationale
+- Fit criterion
+- Assumptions or open questions
+
+---
