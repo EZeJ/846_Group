@@ -3,10 +3,15 @@
 **Authors:** Liliana Hotsko, Alina Lytovchenko, Sofiia Tkach, Zesheng(Ethan) Jia
 
 **Readings Assigned:**
+
 -  Language models are few-shot learners [1]
+
 -  Requirements Elicitation Follow-Up Question Generation [2]
+
 -  Conversational automated program repair[3]
+
 -  SpecGen: Automated Generation of Formal Pro-gram Specifications via Large Language Models[4]
+
 -  Keep the conversation going: Fixing 162 out of 337 bugs for $0.42 each using chatgpt[5]
 
 ___
