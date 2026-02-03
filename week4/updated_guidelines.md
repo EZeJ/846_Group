@@ -1168,14 +1168,19 @@ In the conversation:
 [1] T. Brown, B. Mann, N. Ryder, M. Subbiah, J. D. Kaplan, P. Dhariwal, A. Neelakantan, P.
 Shyam, G. Sastry, A. Askell et al., “Language models are few-shot learners,” Advances in neural
 information processing systems, vol. 33, pp. 1877–1901, 2020.
+
 [2] Y. Shen, A. Singhal, and T. Breaux, “Requirements Elicitation Follow-Up Question Generation,”
 Jul. 03, 2025, arXiv: arXiv:2507.02858. doi: 10.48550/arXiv.2507.02858.
+
 [3] C. S. Xia and L. Zhang, “Conversational automated program repair,” arXiv preprint
 arXiv:2301.13246, 2023.
+
 [4] L. Ma, S. Liu, Y. Li, X. Xie, and L. Bu, “SpecGen: Automated Generation of Formal Pro-
 gram Specifications via Large Language Models,” Feb. 25, 2025, arXiv: arXiv:2401.08807. doi:
 10.48550/arXiv.2401.08807.
+
 [5] C. S. Xia and L. Zhang, “Keep the conversation going: Fixing 162 out of 337 bugs for $0.42
 each using chatgpt,” arXiv preprint arXiv:2304.00385, 2023.
+
 [6] Z. Fan, X. Gao, M. Mirchev, A. Roychoudhury, and S. H. Tan, “Automated Repair of Programs from Large Language Models,” arXiv preprint arXiv:2205.10583, 2022.
 ---
