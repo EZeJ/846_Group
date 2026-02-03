@@ -432,7 +432,8 @@ These requirements balance compliance, user experience, and operational feasibil
 #### Updated Guidelines Prompt and Answers
 ##### Prompt
 
-`##################### Prompt START #####################`
+```
+##################### Prompt START #####################
 
 
 Problem R1: Compliance Prohibitions, Persona Pushes Loopholes
@@ -503,7 +504,8 @@ Loophole Scan:
 - (bullets)
 
 
-`##################### Prompt End #####################`
+##################### Prompt End #####################
+```
 
 
 ##### GitHub Copilot GPT-4o Answer
