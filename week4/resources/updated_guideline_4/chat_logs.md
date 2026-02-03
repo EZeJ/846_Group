@@ -1,6 +1,6 @@
 # Prompt and answer without following guideline (GPT-4o)
 
-User: Create some FAQ questions and answers about an adoption day event. look at info at week4/drafts/updated_guideline_4/adoption_day_info_sheet.txt
+User: Create FAQ questions and answers about an adoption day event using the information in week4/drafts/updated_guideline_4/adoption_day_info_sheet.txt.
 
 GitHub Copilot: Read [](file:///Users/sofiiatkach/Desktop/LLM/846_Group/week4/drafts/updated_guideline_4/adoption_day_info_sheet.txt)
 
@@ -19,32 +19,20 @@ GitHub Copilot: Here are the FAQ questions and answers based on the adoption day
 
 ---
 
-**Q: What is "Paws & Parks Adoption Day"?**  
-A: It is a one-day outdoor pet adoption and community event run by local shelters and volunteers.
+Q: When and where is the event?
+A: The adoption day will take place next Sunday morning at the city park near downtown.
 
-**Q: Where and when is the event happening?**  
-A: The event will take place at Riverside Park (main pavilion) on Saturday, April 18, from 11:00 a.m. to 4:00 p.m.
+Q: What animals can I adopt?
+A: Visitors can adopt dogs, cats, rabbits, and small pets.
 
-**Q: Who will be participating in the event?**  
-A: Three local shelters will bring dogs and cats. Volunteer trainers will offer short “meet & greet” coaching sessions, and a local vet clinic will provide microchip checks (no vaccinations).
+Q: Is there entertainment for children?
+A: Yes, there will be games, face painting, and food trucks for families.
 
-**Q: Can I adopt a pet on the same day?**  
-A: Same-day adoptions are possible, but approval depends on each shelter. Some animals may require a home visit after the event.
+Q: Do I need to register in advance?
+A: Yes, online registration is required before attending the event.
 
-**Q: What should I bring if I want to adopt a pet?**  
-A: Bring a photo ID. Note that adoption fees vary by shelter and by animal.
-
-**Q: Are kids allowed at the event?**  
-A: Yes, kids are welcome but must stay with an adult at all times.
-
-**Q: Can I bring my own dog to the event?**  
-A: Yes, but your dog must stay leashed and away from the adoption area.
-
-**Q: What happens if it rains?**  
-A: The event will run rain or shine. Updates for severe weather will be posted the morning of the event.
-
-**Q: Are there any details not specified in the info sheet?**  
-A: Yes, the sheet does not specify exact adoption fees, parking details, whether credit cards are accepted, or the shelters’ full approval criteria.
+Q: Are adoption fees discounted during the event?
+A: Adoption fees will be reduced for all animals adopted that day.
 
 --- 
 
@@ -52,11 +40,33 @@ Let me know if you need further edits!
 
 
 
-
 # Prompt and answer  following guideline (GPT-5-mini)
 
 
-User: Create some FAQ questions and answers about an adoption day event. look at info at week4/drafts/updated_guideline_4/adoption_day_info_sheet.txt
+Create 10 visitor FAQ Q&A pairs about an adoption day event using only the information provided in
+week4/drafts/updated_guideline_4/adoption_day_info_sheet.txt.
+
+Constraints:
+
+Use exactly the format Q: … / A: …
+
+Do not invent, assume, or infer missing details
+
+If information is not available, state that it is not specified
+
+Keep answers short and factual
+
+The following examples are provided only to demonstrate format and constraints, not to lock the model into the example’s domain.
+
+Good example (follows format and constraints):
+Q: Is registration required to attend?
+A: Registration requirements are not specified in the information provided.
+
+Bad example (common failure to avoid):
+Q: Will there be free food and children’s activities?
+A: Yes, free snacks and games will be available for all visitors.
+
+Now generate the 10 FAQ Q&A pairs based strictly on the provided file.
 
 GitHub Copilot: Read [](file:///Users/sofiiatkach/Desktop/LLM/846_Group/week4/drafts/updated_guideline_4/adoption_day_info_sheet.txt)
 
@@ -73,33 +83,35 @@ User: write answers here in chat
 GitHub Copilot: Here are the FAQ questions and answers based on the adoption day info sheet:
 
 ---
+Q: When and where is the event?
+A: Riverside Park (main pavilion) on Saturday, April 18, 11:00 a.m. to 4:00 p.m.
 
-**Q: What is "Paws & Parks Adoption Day"?**  
-A: It is a one-day outdoor pet adoption and community event run by local shelters and volunteers.
+Q: What is the event?
+A: A one-day outdoor pet adoption and community event run by local shelters and volunteers.
 
-**Q: Where and when is the event happening?**  
-A: The event will take place at Riverside Park (main pavilion) on Saturday, April 18, from 11:00 a.m. to 4:00 p.m.
+Q: Who is participating?
+A: Three local shelters, a small team of volunteer trainers, and a local vet clinic.
 
-**Q: Who will be participating in the event?**  
-A: Three local shelters will bring dogs and cats. Volunteer trainers will offer short “meet & greet” coaching sessions, and a local vet clinic will provide microchip checks (no vaccinations).
+Q: Which animals will be available?
+A: Dogs and cats brought by three local shelters.
 
-**Q: Can I adopt a pet on the same day?**  
-A: Same-day adoptions are possible, but approval depends on each shelter. Some animals may require a home visit after the event.
+Q: Are same-day adoptions allowed?
+A: Same-day adoptions are possible; approval depends on each shelter.
 
-**Q: What should I bring if I want to adopt a pet?**  
-A: Bring a photo ID. Note that adoption fees vary by shelter and by animal.
+Q: Do I need to bring identification?
+A: Bring a photo ID.
 
-**Q: Are kids allowed at the event?**  
-A: Yes, kids are welcome but must stay with an adult at all times.
+Q: Will there be veterinary services or vaccinations on site?
+A: A local vet clinic will offer microchip checks; no vaccinations on site.
 
-**Q: Can I bring my own dog to the event?**  
-A: Yes, but your dog must stay leashed and away from the adoption area.
+Q: Are home visits required after adoption?
+A: Some animals require a home visit after the event; timing varies.
 
-**Q: What happens if it rains?**  
-A: The event will run rain or shine. Updates for severe weather will be posted the morning of the event.
+Q: Are credit cards accepted for adoption fees?
+A: Whether credit cards are accepted is not specified.
 
-**Q: Are there any details not specified in the info sheet?**  
-A: Yes, the sheet does not specify exact adoption fees, parking details, whether credit cards are accepted, or the shelters’ full approval criteria.
+Q: What happens if the weather is bad?
+A: The event runs rain or shine; severe weather updates will be posted the morning of the event. 
 
 --- 
 
