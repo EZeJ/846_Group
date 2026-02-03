@@ -1,3 +1,7 @@
+# Week 4 new Problem set
+
+**Authors:** Liliana Hotsko, Alina Lytovchenko, Sofiia Tkach, Zesheng(Ethan) Jia
+
 # Exercise 1: How Role Formatting Affects LLM Understanding? 
 
 In this exercise, you will test how different dialogue formats affect an LLM’s ability to correctly interpret a technical discussion. (Updated guideline 6).

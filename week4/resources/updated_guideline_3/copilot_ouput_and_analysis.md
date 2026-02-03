@@ -3,7 +3,7 @@
 ## Prompt 
 
 
-```Problem R1: Compliance Prohibitions, Persona Pushes Loopholes
+```Exercise 3: Compliance Prohibitions, Persona Pushes Loopholes
 
 ### Setup (policy excerpt)
 You are given this compliance snippet for a child-focused messaging app:
