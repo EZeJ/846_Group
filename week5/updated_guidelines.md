@@ -121,7 +121,7 @@ Verifies a password reset token and returns the associated user ID if valid.
 
 ## 3. New and Updated Guidelines that worked for Problem A_1
 
-#### Guideline 1 (New): “Purpose + Security-Relevant Contract”
+#### Guideline 4 (New): “Purpose + Security-Relevant Contract”
 This guideline extends “purpose + contract” with mandatory security-relevant contract elements for auth/token code. Instead of a generic purpose-only summary, it requires explicitly stating one key security property, any side effects, and failure modes/exceptions, while still avoiding cryptographic implementation details.
 
 **Prompt and Context:**
