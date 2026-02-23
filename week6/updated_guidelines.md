@@ -2,6 +2,9 @@
 
 **Authors:** Liliana Hotsko, Alina Lytovchenko, Sofiia Tkach, Zesheng(Ethan) Jia
 
+
+# Part 1
+
 ## 1. Counterexample Problems
 
 ### Problem A_1: Secure JWT Verification (Auth Middleware)
@@ -33,6 +36,8 @@ def verify_bearer_token(auth_header: str, public_key_pem: str) -> dict:
     # TODO
     raise NotImplementedError
 ```
+
+
 
 ---
 
@@ -130,3 +135,61 @@ def verify_bearer_token(auth_header: str, public_key_pem: str) -> dict:
 I think this is better because the code explicitly checks the Bearer header format, issuer and audience instead of relying on library defaults. It also allows only RS256 and produces clear, consistent error messages so it’s less likely to accept a bad token or fail in confusing ways. Overall, it’s safer and easier to maintain and debug and I am happy with a result now.
 
 ---
+
+
+# Part 2
+## 1. Counterexample Problem
+
+### Problem B: Mini Issue Tracker API (FastAPI)
+
+You are given a small **FastAPI** service for an internal issue tracker. The codebase contains a **bug** and is missing basic API features. Your task is to fix the bug, extend the API, and make all tests pass.
+
+
+**Tasks**
+
+1. Fix the Bug
+`GET /issues?status=open` must return **only open issues**.
+The current status filter is incorrect.
+
+2. Add Pagination & Sorting
+Extend `GET /issues` with:
+
+**Query parameters**
+- `limit` (default 20, min 1, max 100)
+- `offset` (default 0, min 0)
+- `sort` ∈ {`created_at`, `priority`, `title`} (default `created_at`)
+- `order` ∈ {`asc`, `desc`} (default `desc`)
+
+**Rules**
+- Apply sorting **before** pagination
+- Existing filters (`status`, `q`) must keep working
+
+3. Preserve Response Format
+The API response **must not change shape**:
+```json
+{
+  "items": [...],
+  "total": 123,
+  "limit": 20,
+  "offset": 0
+}
+```
+
+## 2. Guidelines that didn't work for Problem B
+## 3. New and Updated Guidelines that worked for Problem B
+
+
+
+# Part 3
+## 1. Counterexample Problem C
+## 2. Guidelines that didn't work for Problem C
+## 3. New and Updated Guidelines that worked for Problem C
+
+
+
+# Part 4
+## 1. Counterexample Problem D
+## 2. Guidelines that didn't work for Problem D
+## 3. New and Updated Guidelines that worked for Problem D
+
+
