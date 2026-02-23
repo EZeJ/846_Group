@@ -1,2 +1,4 @@
 .DS_Store
 main_agent.agent.md
+__pycache__
+__init__.py
