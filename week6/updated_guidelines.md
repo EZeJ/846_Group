@@ -144,6 +144,7 @@ I think this is better because the code explicitly checks the Bearer header form
 
 You are given a small **FastAPI** service for an internal issue tracker. The codebase contains a **bug** and is missing basic API features. Your task is to fix the bug, extend the API, and make all tests pass.
 
+Codebase: https://github.com/EZeJ/846_Group/tree/main/week6/resources/problem_B
 
 **Tasks**
 
@@ -176,8 +177,42 @@ The API response **must not change shape**:
 ```
 
 ## 2. Guidelines that didn't work for Problem B
+
+## Guideline 5 (“work in short iterative cycles”) 
+
+This Guideline 5 encourages incremental progress, applying it directly to Problem B led to several issues during development.
+
+1. Temporary spec violations
+
+When pagination was first added, the `limit` parameter was defined with `ge=0`, even though the task required `limit ≥ 1`. This violation went unnoticed until a later validation step. The guideline encourages moving forward after each small change, which makes it easy to accept incorrect constraints temporarily and forget to revisit them.
+
+```python
+limit: int = Query(20, ge=0)
+```
+2. Review prompts focused on whether the code “worked” rather than checking global invariants. For example, early reviews did not explicitly verify that pagination constraints matched the specification or that ordering requirements would still hold once sorting was added. As a result, correctness was assumed rather than demonstrated.
+
+3. Pagination was implemented before sorting. This created a structural risk that sorting would later be applied after pagination, which would violate the requirement that sorting occur first. The final solution avoided this only because sorting happened to be implemented in the service layer later, not because the guideline enforced the correct order.
+
+
 ## 3. New and Updated Guidelines that worked for Problem B
 
+**Updated Guideline 5: Constraint-Aware Iteration**
+
+Before making changes, briefly clarify the **constraints** of the task:
+
+1. **State what relationships must be preserved**
+   - For example: some steps must happen before others, or some values must be computed from the full result set.
+   - You do not need to decide *how* this will be implemented yet.
+
+2. **Clarify responsibility boundaries**
+   - Decide which parts of the system are allowed to handle which kinds of logic.
+   - This prevents later changes from spreading responsibilities unintentionally.
+
+Then work in small, incremental steps.  
+After each step, verify that the change **does not violate the stated constraints**, even if new features are added later.
+
+
+The updated guideline worked better because it asked the model to pause and think about the rules of the task before changing the code. This made the fixes more focused and helped keep logic in the right place, instead of spreading changes across the codebase. As a result, each step was easier to review, and it was clearer whether a change respected the original requirements rather than just making the code “work.”
 
 
 # Part 3
