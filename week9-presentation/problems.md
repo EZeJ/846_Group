@@ -1,6 +1,6 @@
-# Week X Example Problems: [Topic Title]
+# Week 9 Example Problems: Testing / QA
 
-**Authors:** [Student Name 1, Student Name 2, Student Name 3]  
+**Authors:** Liliana Hotsko, Alina Lytovchenko, Sofiia Tkach, Zesheng(Ethan) Jia
 
 ## 1. Example Problems
 
