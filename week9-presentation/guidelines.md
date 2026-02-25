@@ -70,6 +70,85 @@ Please fix the tests using these exact errors and regenerate only the failing te
 * Re-prompting with “fix it” but without providing concrete error messages.
 * Running infinite regeneration loops until something passes by chance.
 
+
+### Guideline 3: Explicitly Request Boundary and Negative Test Cases 
+
+**Description:**  
+
+Do not rely on the LLM to independently enumerate edge cases. In the prompt, explicitly require categories of non-happy-path tests and (ideally) minimum counts. At a minimum, request:
+
+* Boundary values: min/max, zero, empty string/collection, single-element, off-by-one
+
+* Null / missing inputs: null, absent keys/fields, optional values missing
+
+* Invalid formats: malformed JSON/CSV, invalid dates, illegal enum values, wrong encoding
+
+* Exception/error paths: inputs that must trigger validation failures or thrown exceptions
+
+* State/contract violations: precondition breaches, invalid state transitions (if applicable)
+
+**Reasoning:**  
+LLMs usually generate “happy-path” tests first. They often don’t invent the weird or extreme inputs that actually trigger validation errors and exception branches. The papers [2] [5] show that many bugs are missed because the tests don’t hit those paths, so you need to tell the model directly to create boundary and negative cases.
+
+**Example:**  
+
+**Good Example:**
+```
+“Generate **JUnit 5 unit tests** for `parseInvoice(String json)`.
+
+Required categories (at least **2 tests each**):
+
+1. Boundary: empty string, very large numeric fields, empty items list
+2. Null/Missing: missing required keys (`invoiceId`, `items`), null values where allowed/disallowed
+3. InvalidFormat: malformed JSON, wrong field types (string instead of number)
+4. ExceptionPath: inputs that must throw `InvalidInvoiceException`
+    
+Constraints: no database/network; use parameterized tests”
+```
+    
+
+**Bad Example:**
+```
+“Write tests for `parseInvoice`. Make sure it covers the main cases and passes.”
+```
+
+### Guideline 4: Decompose Complex Methods Before Asking for Tests
+
+**Description:**  
+
+If a method does multiple things (e.g., validate → transform → persist → log), don’t ask the LLM to “write tests” in one shot. Instead:
+* Ask the LLM to identify the method’s logical sub-behaviors (a short list).
+* Generate separate focused tests per sub-behavior (one responsibility per test group).
+* Keep categories explicit inside each sub-behavior.
+
+This keeps the model from mixing concerns and makes it easier to audit coverage.
+
+**Reasoning:**  
+
+When there are many responsibilities in one method, the model can lose track of what it’s testing and produce shallow or unfocused tests.  Wang et al. (IEEE Survey) [1] note that LLM test quality degrades significantly on long, multi-responsibility methods — the model loses track of which behavior it's testing. So this previous work [1] shows that prompt/context choices strongly affect test generation results.
+
+**Example:**  
+
+**Good Example:**
+
+```
+“Here is `processOrder(Order o)`.
+
+Step 1: List the distinct behaviors in this method (validation rules, price calculation, discount logic, persistence, error handling).
+
+Step 2: For each behavior, generate **JUnit 5** tests focusing only on that behavior.
+
+Step 3: For each behavior, include boundary + negative cases (nulls, invalid inputs, exception paths).
+
+Constraints: don’t test DB/network; use mocks; clear assertions.”
+```
+
+**Bad Example:**
+```
+“Write tests for `processOrder`. Generate unit tests for processOrder(Order o) that ensure it works correctly. Cover the main functionality and make sure the tests pass. Use standard assertions.”
+```
+---
+
 ### Guideline x: [Short, Actionable Title]
 **Description:**  
 State the guideline clearly and concretely.
