@@ -70,6 +70,7 @@ Please fix the tests using these exact errors and regenerate only the failing te
 * Re-prompting with “fix it” but without providing concrete error messages.
 * Running infinite regeneration loops until something passes by chance.
 
+---
 
 ### Guideline 3: Explicitly Request Boundary and Negative Test Cases 
 
@@ -111,6 +112,8 @@ Constraints: no database/network; use parameterized tests”
 ```
 “Write tests for `parseInvoice`. Make sure it covers the main cases and passes.”
 ```
+
+---
 
 ### Guideline 4: Decompose Complex Methods Before Asking for Tests
 
