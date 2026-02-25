@@ -23,7 +23,7 @@ When asking an LLM to generate or improve tests, explicitly state:
 * what not to test
 
 **Reasoning:**  
-In their research roadmap, Augusto et al. highlight that prior work consistently shows prompt engineering substantially influences LLM testing outcomes, motivating an iterative rather than one-shot prompt design process.
+Clear scope reduces ambiguity, so the model produces more relevant and accurate tests instead of generic or off-target output.
 
 **Good Example:**
 “Generate pytest unit tests for parse_invoice(json_str) only. Cover valid input, missing required fields, malformed JSON, and currency normalization. Do not test database calls or network retries. Use parameterized tests and clear assertion messages.”
@@ -33,16 +33,42 @@ In their research roadmap, Augusto et al. highlight that prior work consistently
 
 ---
 
-### Guideline x: [Short, Actionable Title]
+### Guideline 2: Use a Generate–Validate–Repair Loop Instead of One-Shot Generation
 **Description:**  
-State the guideline clearly and concretely.
+Adopt a QA workflow where LLM-generated tests go through an automated repair loop:
+1. Generate tests
+2. Compile and run
+3. Parse failures (imports, mocks, wrong API usage, assertion mismatch)
+4. Feed specific failure feedback back to the model
+5. Regenerate/fix
+6. Re-validate
+Stop after a small number of iterations and escalate to human review.
 
 **Reasoning:**  
-Explain *why* this guideline is important, referencing readings and external sources where relevant.
+A generate–validate–repair loop is more effective than  one-shot generation because test creation is an iterative quality-control task, not a single prediction task: even when generated output looks plausible, hidden issues such as incorrect assumptions, weak assertions, incompatibilities with the local codebase, or syntactic/runtime failures may remain undetected until execution and validation. By explicitly validating the output and feeding back concrete failures, the process converts vague generation into a controlled refinement cycle, which improves reliability, reduces silent errors, and makes the final tests better aligned with actual behavior and project constraints.
 
-**Example:**  
-Provide a brief illustrative example (code or pseudo-code if helpful).
+**Good Example:**  
+```
+Generate JUnit 5 tests for the calculateDiscount(Customer c, Order o) method.
+Use only the provided method and class interfaces.
+Return compilable tests with meaningful assertions for normal cases, edge cases, and invalid inputs.
+If assumptions are needed, state them explicitly in comments.
+```
 
+After compile errors:
+```
+Here are the compiler errors from your previous tests:
+
+CustomerType enum not found
+
+wrong method signature for getTotal()
+Please fix the tests using these exact errors and regenerate only the failing test methods.
+```
+
+**Bad Example**
+* Generating tests once, seeing compile errors, and discarding AI testing entirely.
+* Re-prompting with “fix it” but without providing concrete compiler/runtime error messages.
+* Running infinite regeneration loops until something passes by chance.
 
 ### Guideline x: [Short, Actionable Title]
 **Description:**  
