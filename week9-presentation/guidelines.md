@@ -152,15 +152,25 @@ Constraints: don’t test DB/network; use mocks; clear assertions.”
 ```
 ---
 
-### Guideline x: [Short, Actionable Title]
-**Description:**  
-State the guideline clearly and concretely.
+### Guideline 5: Help the LLM explicitly understand the intention of the focal method
+
+To reduce incorrect assertions and execution failures, do not ask the LLM to generate tests directly. First prompt the LLM to describe the intended behavior of the focal method in natural language.Then use that generated intention as part of the prompt when asking it to write assertions.
 
 **Reasoning:**  
-Explain *why* this guideline is important, referencing readings and external sources where relevant.
+Over 85% of execution failures were caused by incorrect assertions, not bugs in the focal method. [5] This indicates that the LLM often misunderstands what the method is supposed to do, even if it generates syntactically correct tests.
 
-**Example:**  
-Provide a brief illustrative example (code or pseudo-code if helpful).
+**Paper insight:**
+This two-step prompting significantly improves assertion correctness by forcing the model to reason about semantics before generating tests.[5]
+
+**Good example:**
+
+- Intention prompt: “Describe what this method is intended to do.”
+
+- Generation prompt: “Write a unit test based on the above intention.”
+
+**Bad Example:**
+- Generation prompt: “Write a unit test for the method in file.”
+
 
 
 ### Guideline 2: [Short, Actionable Title]
