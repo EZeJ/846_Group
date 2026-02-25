@@ -23,7 +23,7 @@ When asking an LLM to generate or improve tests, explicitly state:
 * what not to test
 
 **Reasoning:**  
-Clear scope reduces ambiguity, so the model produces more relevant and accurate tests instead of generic or off-target output.
+Clear scope reduces ambiguity, so the model produces more relevant and accurate tests instead of generic or off-target output. LLM testing results depend heavily on prompt quality/prompt engineering and that prompt design [6].
 
 **Good Example:**
 “Generate pytest unit tests for parse_invoice(json_str) only. Cover valid input, missing required fields, malformed JSON, and currency normalization. Do not test database calls or network retries. Use parameterized tests and clear assertion messages.”
@@ -45,7 +45,7 @@ Adopt a QA workflow where LLM-generated tests go through an automated repair loo
 Stop after a small number of iterations and escalate to human review.
 
 **Reasoning:**  
-A generate–validate–repair loop is more effective than  one-shot generation because test creation is an iterative quality-control task, not a single prediction task: even when generated output looks plausible, hidden issues such as incorrect assumptions, weak assertions, incompatibilities with the local codebase, or syntactic/runtime failures may remain undetected until execution and validation. By explicitly validating the output and feeding back concrete failures, the process converts vague generation into a controlled refinement cycle, which improves reliability, reduces silent errors, and makes the final tests better aligned with actual behavior and project constraints.
+A generate–validate–repair loop is more effective than  one-shot generation because test creation is an iterative quality-control task, not a single prediction task: even when generated output looks plausible, hidden issues such as incorrect assumptions, weak assertions, incompatibilities with the local codebase, or syntactic/runtime failures may remain undetected until execution and validation. Prior work shows that LLM-generated unit tests frequently suffer from compilation errors and execution/correctness issues, and that iterative refinement can improve outcomes [4], [5]. By explicitly validating the output and feeding back concrete failures, the process converts vague generation into a controlled refinement cycle, which improves reliability, reduces silent errors, and makes the final tests better aligned with actual behavior and project constraints [5].
 
 **Good Example:**  
 ```
@@ -67,7 +67,7 @@ Please fix the tests using these exact errors and regenerate only the failing te
 
 **Bad Example**
 * Generating tests once, seeing compile errors, and discarding AI testing entirely.
-* Re-prompting with “fix it” but without providing concrete compiler/runtime error messages.
+* Re-prompting with “fix it” but without providing concrete error messages.
 * Running infinite regeneration loops until something passes by chance.
 
 ### Guideline x: [Short, Actionable Title]
@@ -94,8 +94,17 @@ Provide a brief illustrative example (code or pseudo-code if helpful).
 
 ## 2. References
 
-[1]  
-[2] 
+[1] Wang, J., et al. "Software Testing with Large Language Models: Survey, Landscape, and Vision" IEEE Transactions on Software Engineering (2024). DOI: 10.1109/TSE.2024.3368208.
+
+[2] Yang, L., et al. "On the Evaluation of Large Language Models in Unit Test Generation" Proceedings of the 39th IEEE/ACM International Conference on Automated Software Engineering (ASE) (2024). DOI: 10.1145/3691620.3695529.
+
+[3] Santana, M. D., Magalhaes, C., and de Souza Santos, R. "Software Testing with Large Language Models: An Interview Study with Practitioners" AIware 2025 (2025).
+
+[4] Siddiq, M. L., et al. "Using Large Language Models to Generate JUnit Tests: An Empirical Study" (2024). DOI: 10.1145/3661167.3661216.
+
+[5] Yuan, Z., et al. "Evaluating and Improving ChatGPT for Unit Test Generation" Proceedings of the ACM on Software Engineering 1(FSE), 1703–1726 (2024). DOI: 10.1145/3660783.
+
+[6] Augusto, C., Bertolino, A., De Angelis, G., Lonetti, F., and Morán, J. "Large Language Models for Software Testing: A Research Roadmap" arXiv preprint (2025).
 
 ---
 
