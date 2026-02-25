@@ -2,48 +2,131 @@
 
 **Authors:** Liliana Hotsko, Alina Lytovchenko, Sofiia Tkach, Zesheng(Ethan) Jia
 
+## 1. General Evaluation Criteria
 
-## 1. Evaluation Criteria
+Students should evaluate their testing approach based on these criteria:
 
-This section defines how students can determine whether they solved the example problems correctly.
+<!-- ### Effectiveness Metrics:
+* **Bug Discovery Rate:** How many intentional bugs were found through testing
+* **Test Coverage:** Percentage of critical edge cases covered
+* **Test Quality:** Specificity and meaningfulness of test assertions
 
-Criteria should be applicable to any problem in this topic.
+### Guideline Application Assessment:
+* **Guideline 3 Application:** Did explicit boundary/negative case requests reveal more bugs than generic testing prompts?
+* **Guideline 4 Application:** Did method decomposition lead to better test organization and more comprehensive coverage?
+* **Comparison Analysis:** Clear difference in results between guided vs. unguided LLM testing
 
-* Criteria 1
-* Criteria 2
-* Criteria n
-
----
-
-## 2. Evalation specifically for Example Problems
-
-### Problem A_1: [Title]
-
-**Evaluation Description:**  
-Describe the evaluation criteria clearly and precisely.
-
-**Code:**  
-// Include all necessary code here that is the correct answer.
-
----
-
-### Problem A_2: [Title]
-
-**Evaluation Description:**  
-Describe the evaluation criteria clearly and precisely.
-
-**Code:**  
-// Include all necessary code here that is the correct answer.
+### Test Completeness Indicators:
+* Null/None input handling
+* Empty/zero-length input handling  
+* Boundary value testing (min/max values)
+* Invalid input format testing
+* Exception path coverage
+* State violation testing -->
 
 ---
 
-### Problem A_n: [Title]
+## 2. Evaluation for Specific Example Problems
+
+### Problem B_1: User Validation Testing
 
 **Evaluation Description:**  
-Describe the evaluation criteria clearly and precisely.
+Students should discover **7 or more intentional bugs** in the validation logic when applying Guideline 3 properly. The unguided approach should miss most boundary and null-handling bugs.
 
-**Code:**  
-// Include all necessary code here that is the correct answer.
+**Possible Bug Discovery Checklist:**
+
+| Bug # | Description | Actual Behavior | Expected Behavior |
+|-------|-------------|----------------|------------------|
+| 1 | `validate_email()` does not raise a TypeError when given None | Returns None or fails silently | Raises TypeError for None input |
+| 2 | Email validation allows consecutive dots | Accepts "user..name@domain.com" | Rejects emails with consecutive dots |
+| 3 | Email validation allows consecutive special characters | Accepts "user.@name@domain.com" | Rejects emails with consecutive special characters |
+| 4 | Email validation allows to start from special character | Accepts ".username@domain.com" | Rejects emails starting with special character |
+| 5 | `validate_age()` has no upper bound | Accepts age 999 | Restricts age to reasonable max (e.g., 120) |
+| 6 | `validate_username()` does not raise a TypeError when given None | Returns None or fails silently | Raises TypeError for None input |
+| 7 | Username length validation off-by-one error | Accepts too short/long usernames | Enforces correct min/max length |
+| 8 | Username can start with numbers | Accepts "1username" | Rejects usernames starting with numbers |
+| 9 | Username can be all numbers | Accepts "123456" | Rejects usernames that are all numbers |
+| 10 | Username pattern validation too permissive | Accepts invalid patterns | Restricts to valid username patterns |
+| 11 | `validate_password()` does not raise a TypeError when given None | Returns None or fails silently | Raises TypeError for None input |
+| 12 | Password length validation off-by-one error | Accepts too short/long passwords | Enforces correct min/max length |
+| 13 | Password validation missing special character check | Accepts passwords without special chars | Requires at least one special character |
+| 14 | Password validation doesn't require uppercase letters | Accepts all lowercase passwords | Requires at least one uppercase letter |
+
+**Expected Results:**
+- **Without Guideline 3:** Should find 2-5 bugs (mainly obvious ones)
+- **With Guideline 3:** Should find 7-13 bugs (comprehensive edge case coverage)
+
+---
+
+### Problem B_2: Order Processing Decomposition
+
+**Evaluation Description:**  
+Students should discover **at least 7 intentional bugs** hidden in the complex `process_order()` method when applying Guideline 4. The decomposition approach should reveal logical flaws that black-box testing misses.
+
+**Possible Bug Discovery Checklist:**
+| Bug # | Description | Actual Behavior | Expected Behavior |
+|-------|-------------|----------------|------------------|
+| 15 | Incomplete order validation | Missing checks for customer_id, items, payment_method | Validates all required fields |
+| 16 | No validation for negative quantities or prices | Accepts negative values | Rejects negative quantities/prices |
+| 17 | "FREEBIE" discount can make total negative | Total becomes negative | Ensures total is never negative |
+| 18 | Invalid discount codes not handled | Ignores invalid codes | Raises error for invalid discount codes |
+| 19 | Tax calculated on pre-discount amount | Calculates tax before discount | Calculates tax after discount |
+| 20 | Free shipping logic broken | Charges shipping for orders > $100 | Free shipping for orders > $100 |
+| 21 | Payment processing assumes success | No validation of payment | Validates payment and handles failures |
+| 22 | Generic error handling loses important failure details | Returns generic error | Returns specific error details |
+| 23 | Payment amount not validated | Accepts negative payment amounts | Rejects negative payment amounts |
+| 24 | Unknown payment methods not properly rejected | Accepts unknown methods | Rejects unknown payment methods |
+
+**Decomposition Quality Assessment:**
+Students should identify these logical sub-behaviors:
+1. Order data validation
+2. Subtotal calculation
+3. Discount application
+4. Tax calculation  
+5. Shipping cost determination
+6. Payment processing
+7. Order state updates
+8. Result generation
+
+**Expected Results:**
+- **Without Guideline 4:** Should find 2-3 bugs (surface-level issues)
+- **With Guideline 4:** Should find 7-10 bugs (through systematic behavior testing)
+
+---
+
+### Problem B_3: Data Parser Edge Cases
+
+**Evaluation Description:**  
+Students should discover ** at least 10 intentional bugs** across multiple parsing functions when applying both Guidelines 3 and 4. This demonstrates the combined power of both approaches.
+
+**Possible Bug Discovery Checklist:**
+
+| Bug # | Description | Actual Behavior | Expected Behavior |
+|-------|-------------|----------------|------------------|
+| 25 | CSV: Crashes on None input | Throws error or fails silently | Handles None input gracefully |
+| 26 | CSV: Doesn't handle empty string input | Throws error or returns invalid | Returns empty result or error |
+| 27 | CSV: Fails on empty files or header-only files | Throws error or returns invalid | Handles empty/header-only files gracefully |
+| 28 | CSV: Doesn't handle rows with missing fields | Ignores or crashes | Handles missing fields with error or default |
+| 29 | CSV: Generic exception handling hides specific CSV errors | Returns generic error | Returns specific CSV error |
+| 30 | JSON: Crashes on None input | Throws error or fails silently | Handles None input gracefully |
+| 31 | JSON: Doesn't validate that parsed JSON is a dictionary | Accepts non-dict | Validates parsed object is dict |
+| 32 | JSON: Required field validation continues instead of failing | Continues with missing fields | Fails if required fields missing |
+| 33 | JSON: Unhelpful error messages for JSON decode errors | Returns generic error | Returns informative decode error |
+| 34 | Numbers: Crashes on None input | Throws error or fails silently | Handles None input gracefully |
+| 35 | Numbers: Doesn't handle empty string | Throws error or returns invalid | Returns empty result or error |
+| 36 | Numbers: Regex doesn't capture negative numbers | Ignores negatives | Captures negative numbers |
+| 37 | Numbers: Doesn't handle scientific notation | Ignores scientific notation | Captures scientific notation |
+| 38 | Numbers: Fails on standalone dot "." | Throws error or returns invalid | Handles standalone dot gracefully |
+| 39 | Numbers: Silently ignores conversion errors | Ignores errors | Reports conversion errors |
+| 40 | Whitespace: Crashes on None input | Throws error or fails silently | Handles None input gracefully |
+| 41 | Whitespace: Improper empty string handling | Throws error or returns invalid | Handles empty string gracefully |
+| 42 | Whitespace: Line break preservation logic inverted | Breaks lines incorrectly | Preserves line breaks correctly |
+| 43 | Whitespace: Doesn't handle all whitespace types | Ignores some whitespace types | Handles all whitespace types |
+| 44 | Whitespace: Inappropriate stripping in some contexts | Strips needed whitespace | Strips only unnecessary whitespace |
+| 45 | Data Types: No null checks | Ignores nulls | Checks for nulls |
+| 46 | Data Types: Doesn't validate input is a dictionary | Accepts non-dict | Validates input is dict |
+| 47 | Data Types: Missing fields silently ignored | Ignores missing fields | Reports missing fields |
+| 48 | Data Types: Type checking logic flaws (inheritance, None handling) | Incorrect type checks | Correctly checks types, handles None |
 
 ---
 

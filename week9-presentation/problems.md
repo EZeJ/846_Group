@@ -2,35 +2,43 @@
 
 **Authors:** Liliana Hotsko, Alina Lytovchenko, Sofiia Tkach, Zesheng(Ethan) Jia
 
+## Relevant Guidelines per Problem
+
+| Question | Guidelines |
+|---------|------------|
+|   B_1| 3 |
+|   B_2 | 4      |
+|   B_3 |  3 , 4 |
+
 ## 1. Example Problems
 
-### Problem A_1: [Title]
+### Problem B_1: User Validation Testing
 
 **Task Description:**  
-Describe the task clearly and precisely.
+You are given a user validation module with functions that validate email addresses, ages, usernames and passwords. Your task is to write comprehensive unit tests using pytest that will reveal bugs in the validation logic.
 
 **Starter Code:**  
-// Include all necessary starter code here or in a repo and share the link.
-
+See `user_validator.py` in the Problem_B_1 folder.
 ---
 
-### Problem A_2: [Title]
+### Problem B_2: Order Processing Decomposition (Guideline 4 Focus)
 
 **Task Description:**  
-Describe the task clearly and precisely.
+You are given a complex `process_order()` method that handles validation, calculations, discounts, taxes, payment processing, and confirmation generation all in one function. Your task is to write comprehensive tests that expose the hidden bugs in this complex method.
 
 **Starter Code:**  
-// Include all necessary starter code here or in a repo and share the link.
-
+See `order_processor.py` in the Problem_B_2 folder.
 ---
 
-### Problem A_n: [Title]
+### Problem B_3: Data Parser Edge Cases (Combined Guidelines 3 & 4)
 
 **Task Description:**  
-Describe the task clearly and precisely.
+You are given a data parsing module with functions for CSV parsing, JSON configuration validation, number extraction, and data type validation. Each function has multiple edge cases that need thorough testing.
 
 **Starter Code:**  
-// Include all necessary starter code here or in a repo and share the link.
+See `data_parser.py` in the Problem_B_3 folder.
+
+**Expected Discovery:** The combination of both guidelines will reveal numerous edge case bugs and parsing failures that simple testing approaches miss.
 
 ---
 
