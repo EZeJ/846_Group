@@ -6,6 +6,7 @@
 
 | Question | Guidelines |
 |---------|------------|
+|   A | 1, 2 |
 |   B_1| 3 |
 |   B_2 | 4      |
 |   B_3 |  3 , 4 |
@@ -13,6 +14,15 @@
 ## 1. Example Problems
 
 > All tasks should be completed in Python using pytest. Use the GPT-4.1 model. For testing, use the `@pytest.mark.parametrize` decorator to efficiently check multiple input cases and uncover bugs in the functions.
+
+### Problem A: Checkout Service Testing
+
+**Task Description:**
+You have a checkout service module for an online store. This service handles item-level discounts (flash sales, bundle deals), three distinct coupon types (`SAVE10`, `SUMMER20`, `FLASH5`), a loyalty-points redemption system, shipping cost rules, tax calculation, and payment processing. You need to create unit tests that uncover if the implementation has any bugs.
+
+**Starter Code:**
+See `checkout_service.py` in the `problem_A` folder.
+---
 
 ### Problem B_1: User Validation Testing
 

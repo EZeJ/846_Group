@@ -6,32 +6,38 @@
 
 Students should evaluate their testing approach based on these criteria:
 
-<!-- ### Effectiveness Metrics:
-* **Bug Discovery Rate:** How many intentional bugs were found through testing
-* **Test Coverage:** Percentage of critical edge cases covered
-* **Test Quality:** Specificity and meaningfulness of test assertions
-
-### Guideline Application Assessment:
-* **Guideline 3 Application:** Did explicit boundary/negative case requests reveal more bugs than generic testing prompts?
-* **Guideline 4 Application:** Did method decomposition lead to better test organization and more comprehensive coverage?
-* **Comparison Analysis:** Clear difference in results between guided vs. unguided LLM testing
-
-### Test Completeness Indicators:
-* Null/None input handling
-* Empty/zero-length input handling  
-* Boundary value testing (min/max values)
-* Invalid input format testing
-* Exception path coverage
-* State violation testing -->
+* **Bug Discovery Rate:** How effectively the tests identify defects in the code.
+* **Test Coverage:** The extent to which tests cover critical paths, edge cases, and requirements.
 
 ---
 
 ## 2. Evaluation for Specific Example Problems
 
+### Problem A: Checkout Service Testing
+
+**Evaluation Description:**
+Students should discover **all 9 intentional bugs** when applying both guidelines properly. A vague one-shot prompt will miss most bugs. The bugs span interacting features (item-level discounts, three coupon types, loyalty points, shipping) so only a prompt that explicitly decomposes each business rule and tests boundary/combination cases will uncover them all.
+
+**Possible Bug Discovery Checklist:**
+
+| Bug # | Description | Actual Behavior | Expected Behavior |
+|-------|-------------|----------------|------------------|
+| 1 | Empty cart is not validated | Proceeds to checkout with 0 subtotal, returns "success" | Raises `CheckoutError("Cart is empty")` |
+| 2 | Stock check logic is inverted | Raises `CheckoutError` when item **is** in stock; allows checkout when out of stock | Raises `CheckoutError` only when item is **not** in stock |
+| 3 | Bundle discount threshold off-by-one | Bundle 5% discount only triggers when `quantity > 3` (i.e., quantity 4+) | Should trigger when `quantity >= 3` (i.e., quantity 3+) |
+| 4 | SUMMER20 cap logic inverted | Uses `max(20%, $30)` — gives a **minimum** $30 discount instead of a **maximum** $30 cap; no cap applied when 20% > $30 | Should use `min(20%, $30)` to cap at $30 |
+| 5 | FLASH5 + VIP combination not blocked | VIP customers can use FLASH5 coupon and receive both discounts | Should raise `CheckoutError` when `FLASH5` is requested with a VIP customer |
+| 6 | Tax calculated on pre-discount subtotal | Tax is `subtotal * 0.13` instead of `(discounted_subtotal - loyalty_credit) * 0.13` | Tax base must be the fully-discounted, loyalty-adjusted amount |
+| 7 | Shipping threshold uses pre-discount subtotal | Free shipping granted when original `subtotal >= $50`, even if discounts bring it below | Should check `discounted_subtotal >= $50` |
+| 8 | Payment failure not handled | `charge()` return value is ignored; checkout returns "success" even on payment failure | Raises `CheckoutError("Payment failed: <reason>")` when `charge()` returns `{"success": False, ...}` |
+| 9 | Total not floored at zero | With a large enough discount + loyalty credit, `total` can be negative | `total = max(0.0, total)` |
+
 ### Problem B_1: User Validation Testing
 
-**Evaluation Description:**  
-Students should discover **7 or more intentional bugs** in the validation logic when applying Guideline 3 properly. The unguided approach should miss most boundary and null-handling bugs.
+**Evaluation Description:** 
+Students must identify bugs in the provided code. Using Guideline 3, they should find **at least 7 bugs**; the more bugs found, the better. 
+
+You should compare bugs found using the checklist below with the bugs.
 
 **Possible Bug Discovery Checklist:**
 
@@ -60,7 +66,11 @@ Students should discover **7 or more intentional bugs** in the validation logic 
 ### Problem B_2: Order Processing Decomposition
 
 **Evaluation Description:**  
-Students should discover **at least 7 intentional bugs** hidden in the complex `process_order()` method when applying Guideline 4. The decomposition approach should reveal logical flaws that black-box testing misses.
+Students must find **at least 7** intentional bugs hidden in the complex process_order() method by applying Guideline 4. 
+
+Decomposition should reveal logical flaws that black-box testing misses. 
+
+You should compare bugs found using the checklist below with the bugs.
 
 **Possible Bug Discovery Checklist:**
 | Bug # | Description | Actual Behavior | Expected Behavior |
@@ -96,7 +106,9 @@ Students should identify these logical sub-behaviors:
 ### Problem B_3: Data Parser Edge Cases
 
 **Evaluation Description:**  
-Students should discover ** at least 10 intentional bugs** across multiple parsing functions when applying both Guidelines 3 and 4. This demonstrates the combined power of both approaches.
+Students should discover ** at least 10 bugs** across multiple parsing functions when applying both Guidelines 3 and 4. 
+
+You should compare bugs found using the checklist below with the bugs.
 
 **Possible Bug Discovery Checklist:**
 
@@ -126,6 +138,11 @@ Students should discover ** at least 10 intentional bugs** across multiple parsi
 | 22 | Data Types: Doesn't validate input is a dictionary | Accepts non-dict | Validates input is dict |
 | 23 | Data Types: Missing fields silently ignored | Ignores missing fields | Reports missing fields |
 | 24 | Data Types: Type checking logic flaws (inheritance, None handling) | Incorrect type checks | Correctly checks types, handles None |
+
+**Expected Results:**
+- **Without Guidelines 3 & 4:** Should find 3-6 bugs (mainly obvious input errors and crashes)
+- **With Guidelines 3 & 4:** Should find 10-24 bugs (comprehensive edge case coverage across all parsing functions)
+
 
 
 

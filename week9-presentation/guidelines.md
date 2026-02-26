@@ -49,10 +49,27 @@ A generate–validate–repair loop is more effective than  one-shot generation 
 
 **Good Example:**  
 ```
-Generate JUnit 5 tests for the calculateDiscount(Customer c, Order o) method.
-Use only the provided method and class interfaces.
-Return compilable tests with meaningful assertions for normal cases, edge cases, and invalid inputs.
-If assumptions are needed, state them explicitly in comments.
+Generate pytest unit tests for `CheckoutService.process_checkout` in `checkout_service.py`.
+
+Framework: pytest + `unittest.mock.MagicMock` for `InventoryService` and `PaymentGateway`.
+Use `@pytest.mark.parametrize` for boundary values. Use `pytest.raises(CheckoutError)` for all error paths.
+Do NOT test the external dependencies themselves.
+
+Cover each rule with at least one test:
+
+- Empty cart -> CheckoutError
+- Stock check: error when out of stock, success when in stock
+- Flash-sale discount (5%), bundle discount (quantity >= 3, 5%)
+- SAVE10 (10%, min $100), SUMMER20 (20% capped at $30, min $75), FLASH5 (5% on flash items)
+- VIP discount (15%) incompatible with all coupons; FLASH5 incompatible with VIP
+- Loyalty credit applied only when points >= 500
+- Shipping: $10 if discounted subtotal < $50, else $0
+- Tax: 13% on post-discount, post-loyalty-credit amount
+- Payment failure -> CheckoutError
+- Total must never be negative
+
+Parametrize: quantity in {2,3,4}; subtotal at $74.99/$75/$99.99/$100; shipping boundary at $49.99/$50/$50.01.
+State any assumptions as inline comments. Return only the test file.
 ```
 
 After compile errors:
