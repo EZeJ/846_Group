@@ -30,8 +30,10 @@ Students should evaluate their testing approach based on these criteria:
 
 ### Problem B_1: User Validation Testing
 
-**Evaluation Description:**  
-Students should discover **7 or more intentional bugs** in the validation logic when applying Guideline 3 properly. The unguided approach should miss most boundary and null-handling bugs.
+**Evaluation Description:** 
+Students must identify bugs in the provided code. Using Guideline 3, they should find **at least 7 bugs**; the more bugs found, the better. 
+
+You should compare bugs found using the checklist below with the bugs.
 
 **Possible Bug Discovery Checklist:**
 
@@ -60,7 +62,11 @@ Students should discover **7 or more intentional bugs** in the validation logic 
 ### Problem B_2: Order Processing Decomposition
 
 **Evaluation Description:**  
-Students should discover **at least 7 intentional bugs** hidden in the complex `process_order()` method when applying Guideline 4. The decomposition approach should reveal logical flaws that black-box testing misses.
+Students must find **at least 7** intentional bugs hidden in the complex process_order() method by applying Guideline 4. 
+
+Decomposition should reveal logical flaws that black-box testing misses. 
+
+You should compare bugs found using the checklist below with the bugs.
 
 **Possible Bug Discovery Checklist:**
 | Bug # | Description | Actual Behavior | Expected Behavior |
@@ -96,7 +102,9 @@ Students should identify these logical sub-behaviors:
 ### Problem B_3: Data Parser Edge Cases
 
 **Evaluation Description:**  
-Students should discover ** at least 10 intentional bugs** across multiple parsing functions when applying both Guidelines 3 and 4. This demonstrates the combined power of both approaches.
+Students should discover ** at least 10 bugs** across multiple parsing functions when applying both Guidelines 3 and 4. 
+
+You should compare bugs found using the checklist below with the bugs.
 
 **Possible Bug Discovery Checklist:**
 
@@ -126,6 +134,11 @@ Students should discover ** at least 10 intentional bugs** across multiple parsi
 | 22 | Data Types: Doesn't validate input is a dictionary | Accepts non-dict | Validates input is dict |
 | 23 | Data Types: Missing fields silently ignored | Ignores missing fields | Reports missing fields |
 | 24 | Data Types: Type checking logic flaws (inheritance, None handling) | Incorrect type checks | Correctly checks types, handles None |
+
+**Expected Results:**
+- **Without Guidelines 3 & 4:** Should find 3-6 bugs (mainly obvious input errors and crashes)
+- **With Guidelines 3 & 4:** Should find 10-24 bugs (comprehensive edge case coverage across all parsing functions)
+
 
 ---
 
