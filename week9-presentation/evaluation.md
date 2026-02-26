@@ -13,6 +13,25 @@ Students should evaluate their testing approach based on these criteria:
 
 ## 2. Evaluation for Specific Example Problems
 
+### Problem A: Checkout Service Testing
+
+**Evaluation Description:**
+Students should discover **all 9 intentional bugs** when applying both guidelines properly. A vague one-shot prompt will miss most bugs. The bugs span interacting features (item-level discounts, three coupon types, loyalty points, shipping) so only a prompt that explicitly decomposes each business rule and tests boundary/combination cases will uncover them all.
+
+**Possible Bug Discovery Checklist:**
+
+| Bug # | Description | Actual Behavior | Expected Behavior |
+|-------|-------------|----------------|------------------|
+| 1 | Empty cart is not validated | Proceeds to checkout with 0 subtotal, returns "success" | Raises `CheckoutError("Cart is empty")` |
+| 2 | Stock check logic is inverted | Raises `CheckoutError` when item **is** in stock; allows checkout when out of stock | Raises `CheckoutError` only when item is **not** in stock |
+| 3 | Bundle discount threshold off-by-one | Bundle 5% discount only triggers when `quantity > 3` (i.e., quantity 4+) | Should trigger when `quantity >= 3` (i.e., quantity 3+) |
+| 4 | SUMMER20 cap logic inverted | Uses `max(20%, $30)` — gives a **minimum** $30 discount instead of a **maximum** $30 cap; no cap applied when 20% > $30 | Should use `min(20%, $30)` to cap at $30 |
+| 5 | FLASH5 + VIP combination not blocked | VIP customers can use FLASH5 coupon and receive both discounts | Should raise `CheckoutError` when `FLASH5` is requested with a VIP customer |
+| 6 | Tax calculated on pre-discount subtotal | Tax is `subtotal * 0.13` instead of `(discounted_subtotal - loyalty_credit) * 0.13` | Tax base must be the fully-discounted, loyalty-adjusted amount |
+| 7 | Shipping threshold uses pre-discount subtotal | Free shipping granted when original `subtotal >= $50`, even if discounts bring it below | Should check `discounted_subtotal >= $50` |
+| 8 | Payment failure not handled | `charge()` return value is ignored; checkout returns "success" even on payment failure | Raises `CheckoutError("Payment failed: <reason>")` when `charge()` returns `{"success": False, ...}` |
+| 9 | Total not floored at zero | With a large enough discount + loyalty credit, `total` can be negative | `total = max(0.0, total)` |
+
 ### Problem B_1: User Validation Testing
 
 **Evaluation Description:** 
