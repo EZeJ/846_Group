@@ -127,6 +127,22 @@ Students should discover ** at least 10 intentional bugs** across multiple parsi
 | 23 | Data Types: Missing fields silently ignored | Ignores missing fields | Reports missing fields |
 | 24 | Data Types: Type checking logic flaws (inheritance, None handling) | Incorrect type checks | Correctly checks types, handles None |
 
+
+
+# Problem C
+
+
+### GUIDED vs. UNGUIDED COVERAGE COMPARISON
+
+| Metric            | Unguided | Guided |
+|------------------:|---------:|-------:|
+| Coverage %        | 28.3%    | 61.6%  |
+| Covered lines     | 123      | 268    |
+| Uncovered lines   | 312      | 167    |
+| Tests passed      | 3        | 12     |
+| Tests failed      | 0        | 1      |
+| Passes threshold  | False    | True   |
+
 ---
 
 ## 3. References

@@ -150,36 +150,90 @@ Constraints: don’t test DB/network; use mocks; clear assertions.”
 ```
 “Write tests for `processOrder`. Generate unit tests for processOrder(Order o) that ensure it works correctly. Cover the main functionality and make sure the tests pass. Use standard assertions.”
 ```
+
+
 ---
 
-### Guideline 5: Help the LLM explicitly understand the intention of the focal method
+### Guideline 5: Use a Structured Three-Step Prompt to Maximise Test Coverage
 
-To reduce incorrect assertions and execution failures, do not ask the LLM to generate tests directly. First prompt the LLM to describe the intended behavior of the focal method in natural language.Then use that generated intention as part of the prompt when asking it to write assertions.
+**Description:**
+Instead of asking an LLM to generate tests in one shot, use a fixed three-step prompt sequence that combines scope, intention, decomposition, edge cases, and a repair loop:
 
-**Reasoning:**  
-Over 85% of execution failures were caused by incorrect assertions, not bugs in the focal method. [5] This indicates that the LLM often misunderstands what the method is supposed to do, even if it generates syntactically correct tests.
+**Step 1 — Describe intention per behavior group (no code yet)**
+Scope the target module into its distinct behavior groups, then ask the LLM to describe the intended behavior of each group — what it does, what inputs it accepts, what it returns or raises, and any conditional branches. Do not ask for code yet.
 
-**Paper insight:**
-This two-step prompting significantly improves assertion correctness by forcing the model to reason about semantics before generating tests.[5]
+**Step 2 — Generate tests using the description**
+Using the Step 1 output, ask the LLM to write one test group per behavior, and for every described behavior, branch, and edge case require:
+- 1 happy-path test
+- 1 boundary test (None, empty, zero, min/max)
+- 1 negative/exception test (invalid input, wrong type, missing field)
 
-**Good example:**
+Include explicit constraints: test framework, what not to test, and how methods must be invoked (e.g. always via the test client, never by calling internals directly).
 
-- Intention prompt: “Describe what this method is intended to do.”
+**Step 3 — Repair failures**
+Run the tests, paste the exact `pytest --tb=short` output back to the LLM, and ask it to fix only the failing tests using only the error message as evidence. Repeat until all tests pass or escalate to human review.
 
-- Generation prompt: “Write a unit test based on the above intention.”
+**Reasoning:**
+- Without scope, the LLM picks shallow happy-path cases
+- Without decomposition, it loses track of responsibilities in large modules
+- Without boundary/negative requests, it skips edge cases entirely
+- Without intention-first, it writes assertions that misrepresent actual behavior — over 85% of execution failures stem from incorrect assertions, not bugs [5]
+- Without a repair loop, compilation and runtime errors go unfixed
+
+**Good Example:**
+
+*Step 1 prompt:*
+```
+Read Flask's app.py. For each of these behavior groups only, describe
+the intended behavior — inputs, return values, exceptions, branches:
+
+1. Response type handling  – str, bytes, dict/JSON, tuples
+2. make_response()         – valid inputs, invalid types
+3. Error handling          – 404, 405, 500, custom handlers
+4. Request context         – setup and teardown
+5. URL building (url_for)  – valid routes, missing params, unknown endpoint
+6. Request hooks           – before_request, after_request, teardown_request
+7. Static files            – send_static_file, open_resource
+
+Do not write any code yet.
+```
+
+*Step 2 prompt:*
+```
+Using the descriptions above, write pytest tests for app.py.
+
+For each of the 7 groups write a separate test group. For every described
+behavior, branch, and edge case include:
+  - 1 happy-path test
+  - 1 boundary test (None, empty, zero, min/max)
+  - 1 negative/exception test (invalid input, wrong type, missing route)
+
+Assertions must match the described behavior exactly — do not guess.
+
+Constraints:
+  - pytest with app/client fixtures
+  - never call internal methods directly — use test_client() or
+    test_request_context() only
+  - do not test blueprints, CLI, or async
+  - all tests must pass with: pytest test_app_py.py
+```
+
+*Step 3 prompt (after running pytest --tb=short -q):*
+```
+Here are the pytest failures:
+
+<paste exact pytest output>
+
+For each failure:
+  1. Identify the root cause from the error message only
+  2. Fix only the failing test — do not modify passing tests
+  3. Regenerate only the fixed test methods
+```
 
 **Bad Example:**
-- Generation prompt: “Write a unit test for the method in file.”
-
-
-
-### Guideline 2: [Short, Actionable Title]
-(Repeat the same structure for each guideline.)
-
----
-
-### Guideline N: [Short, Actionable Title]
-(Repeat the same structure for each guideline.)
+```
+"Write tests for app.py. Make sure they pass."
+```
 
 ---
 
