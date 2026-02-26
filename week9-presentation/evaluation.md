@@ -41,16 +41,15 @@ Students should discover **7 or more intentional bugs** in the validation logic 
 | 2 | Email validation allows consecutive dots | Accepts "user..name@domain.com" | Rejects emails with consecutive dots |
 | 3 | Email validation allows consecutive special characters | Accepts "user.@name@domain.com" | Rejects emails with consecutive special characters |
 | 4 | Email validation allows to start from special character | Accepts ".username@domain.com" | Rejects emails starting with special character |
-| 5 | `validate_age()` has no upper bound | Accepts age 999 | Restricts age to reasonable max (e.g., 120) |
+| 5 | `validate_age()` has no upper and lower bound | Accepts age 999 and 0 | Restricts age to reasonable max  |
 | 6 | `validate_username()` does not raise a TypeError when given None | Returns None or fails silently | Raises TypeError for None input |
 | 7 | Username length validation off-by-one error | Accepts too short/long usernames | Enforces correct min/max length |
 | 8 | Username can start with numbers | Accepts "1username" | Rejects usernames starting with numbers |
 | 9 | Username can be all numbers | Accepts "123456" | Rejects usernames that are all numbers |
-| 10 | Username pattern validation too permissive | Accepts invalid patterns | Restricts to valid username patterns |
-| 11 | `validate_password()` does not raise a TypeError when given None | Returns None or fails silently | Raises TypeError for None input |
-| 12 | Password length validation off-by-one error | Accepts too short/long passwords | Enforces correct min/max length |
-| 13 | Password validation missing special character check | Accepts passwords without special chars | Requires at least one special character |
-| 14 | Password validation doesn't require uppercase letters | Accepts all lowercase passwords | Requires at least one uppercase letter |
+| 10 | `validate_password()` does not raise a TypeError when given None | Returns None or fails silently | Raises TypeError for None input |
+| 11 | Password length validation off-by-one error | Accepts too short/long passwords | Enforces correct min/max length |
+| 12 | Password validation missing special character check | Accepts passwords without special chars | Requires at least one special character |
+| 13 | Password validation doesn't require uppercase letters | Accepts all lowercase passwords | Requires at least one uppercase letter |
 
 **Expected Results:**
 - **Without Guideline 3:** Should find 2-5 bugs (mainly obvious ones)
