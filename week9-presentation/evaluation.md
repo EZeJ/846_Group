@@ -102,30 +102,30 @@ Students should discover ** at least 10 intentional bugs** across multiple parsi
 
 | Bug # | Description | Actual Behavior | Expected Behavior |
 |-------|-------------|----------------|------------------|
-| 25 | CSV: Crashes on None input | Throws error or fails silently | Handles None input gracefully |
-| 26 | CSV: Doesn't handle empty string input | Throws error or returns invalid | Returns empty result or error |
-| 27 | CSV: Fails on empty files or header-only files | Throws error or returns invalid | Handles empty/header-only files gracefully |
-| 28 | CSV: Doesn't handle rows with missing fields | Ignores or crashes | Handles missing fields with error or default |
-| 29 | CSV: Generic exception handling hides specific CSV errors | Returns generic error | Returns specific CSV error |
-| 30 | JSON: Crashes on None input | Throws error or fails silently | Handles None input gracefully |
-| 31 | JSON: Doesn't validate that parsed JSON is a dictionary | Accepts non-dict | Validates parsed object is dict |
-| 32 | JSON: Required field validation continues instead of failing | Continues with missing fields | Fails if required fields missing |
-| 33 | JSON: Unhelpful error messages for JSON decode errors | Returns generic error | Returns informative decode error |
-| 34 | Numbers: Crashes on None input | Throws error or fails silently | Handles None input gracefully |
-| 35 | Numbers: Doesn't handle empty string | Throws error or returns invalid | Returns empty result or error |
-| 36 | Numbers: Regex doesn't capture negative numbers | Ignores negatives | Captures negative numbers |
-| 37 | Numbers: Doesn't handle scientific notation | Ignores scientific notation | Captures scientific notation |
-| 38 | Numbers: Fails on standalone dot "." | Throws error or returns invalid | Handles standalone dot gracefully |
-| 39 | Numbers: Silently ignores conversion errors | Ignores errors | Reports conversion errors |
-| 40 | Whitespace: Crashes on None input | Throws error or fails silently | Handles None input gracefully |
-| 41 | Whitespace: Improper empty string handling | Throws error or returns invalid | Handles empty string gracefully |
-| 42 | Whitespace: Line break preservation logic inverted | Breaks lines incorrectly | Preserves line breaks correctly |
-| 43 | Whitespace: Doesn't handle all whitespace types | Ignores some whitespace types | Handles all whitespace types |
-| 44 | Whitespace: Inappropriate stripping in some contexts | Strips needed whitespace | Strips only unnecessary whitespace |
-| 45 | Data Types: No null checks | Ignores nulls | Checks for nulls |
-| 46 | Data Types: Doesn't validate input is a dictionary | Accepts non-dict | Validates input is dict |
-| 47 | Data Types: Missing fields silently ignored | Ignores missing fields | Reports missing fields |
-| 48 | Data Types: Type checking logic flaws (inheritance, None handling) | Incorrect type checks | Correctly checks types, handles None |
+| 1 | CSV: Crashes on None input | Throws error or fails silently | Handles None input gracefully |
+| 2 | CSV: Doesn't handle empty string input | Throws error or returns invalid | Returns empty result or error |
+| 3 | CSV: Fails on empty files or header-only files | Throws error or returns invalid | Handles empty/header-only files gracefully |
+| 4 | CSV: Doesn't handle rows with missing fields | Ignores or crashes | Handles missing fields with error or default |
+| 5 | CSV: Generic exception handling hides specific CSV errors | Returns generic error | Returns specific CSV error |
+| 6 | JSON: Crashes on None input | Throws error or fails silently | Handles None input gracefully |
+| 7 | JSON: Doesn't validate that parsed JSON is a dictionary | Accepts non-dict | Validates parsed object is dict |
+| 8 | JSON: Required field validation continues instead of failing | Continues with missing fields | Fails if required fields missing |
+| 9 | JSON: Unhelpful error messages for JSON decode errors | Returns generic error | Returns informative decode error |
+| 10 | Numbers: Crashes on None input | Throws error or fails silently | Handles None input gracefully |
+| 11 | Numbers: Doesn't handle empty string | Throws error or returns invalid | Returns empty result or error |
+| 12 | Numbers: Regex doesn't capture negative numbers | Ignores negatives | Captures negative numbers |
+| 13 | Numbers: Doesn't handle scientific notation | Ignores scientific notation | Captures scientific notation |
+| 14 | Numbers: Fails on standalone dot "." | Throws error or returns invalid | Handles standalone dot gracefully |
+| 15 | Numbers: Silently ignores conversion errors | Ignores errors | Reports conversion errors |
+| 16 | Whitespace: Crashes on None input | Throws error or fails silently | Handles None input gracefully |
+| 17 | Whitespace: Improper empty string handling | Throws error or returns invalid | Handles empty string gracefully |
+| 18 | Whitespace: Line break preservation logic inverted | Breaks lines incorrectly | Preserves line breaks correctly |
+| 19 | Whitespace: Doesn't handle all whitespace types | Ignores some whitespace types | Handles all whitespace types |
+| 20 | Whitespace: Inappropriate stripping in some contexts | Strips needed whitespace | Strips only unnecessary whitespace |
+| 21 | Data Types: No null checks | Ignores nulls | Checks for nulls |
+| 22 | Data Types: Doesn't validate input is a dictionary | Accepts non-dict | Validates input is dict |
+| 23 | Data Types: Missing fields silently ignored | Ignores missing fields | Reports missing fields |
+| 24 | Data Types: Type checking logic flaws (inheritance, None handling) | Incorrect type checks | Correctly checks types, handles None |
 
 ---
 

@@ -12,6 +12,8 @@
 
 ## 1. Example Problems
 
+> All tasks should be completed in Python using pytest. Use the GPT-4.1 model. For testing, use the `@pytest.mark.parametrize` decorator to efficiently check multiple input cases and uncover bugs in the functions.
+
 ### Problem B_1: User Validation Testing
 
 **Task Description:**  
