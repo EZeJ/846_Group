@@ -6,23 +6,8 @@
 
 Students should evaluate their testing approach based on these criteria:
 
-<!-- ### Effectiveness Metrics:
-* **Bug Discovery Rate:** How many intentional bugs were found through testing
-* **Test Coverage:** Percentage of critical edge cases covered
-* **Test Quality:** Specificity and meaningfulness of test assertions
-
-### Guideline Application Assessment:
-* **Guideline 3 Application:** Did explicit boundary/negative case requests reveal more bugs than generic testing prompts?
-* **Guideline 4 Application:** Did method decomposition lead to better test organization and more comprehensive coverage?
-* **Comparison Analysis:** Clear difference in results between guided vs. unguided LLM testing
-
-### Test Completeness Indicators:
-* Null/None input handling
-* Empty/zero-length input handling  
-* Boundary value testing (min/max values)
-* Invalid input format testing
-* Exception path coverage
-* State violation testing -->
+* **Bug Discovery Rate:** How effectively the tests identify defects in the code.
+* **Test Coverage:** The extent to which tests cover critical paths, edge cases, and requirements.
 
 ---
 
