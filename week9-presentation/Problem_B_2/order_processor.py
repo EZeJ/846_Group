@@ -1,7 +1,6 @@
 """
 Order Processing Service - Problem B
 Complex method that needs decomposition for proper testing
-Contains intentional bugs that will be revealed through decomposition
 """
 
 from datetime import datetime, date
@@ -64,22 +63,19 @@ class OrderProcessor:
         Returns:
             Dict: Processing result with status and details
             
-        Intentional Bugs: Multiple bugs hidden in the complex logic
         """
         try:
-            # Step 1: Validate order (Bug 14: Incomplete validation)
             if not order.order_id:
                 raise ValueError("Order ID required")
-            # Bug 14: Doesn't validate customer_id, items, payment_method
-            
-            # Step 2: Calculate totals (Bug 15: Calculation error)
+
+            # Step 2: Calculate totals
             subtotal = 0
             for item in order.items:
-                # Bug 15: Doesn't check for negative quantities or prices
+                
                 item_total = item['quantity'] * item['price']
                 subtotal += item_total
             
-            # Step 3: Apply discount (Bug 16: Division by zero possible)
+            # Step 3: Apply discounts
             discount_amount = 0
             if discount_code:
                 if discount_code == "SAVE10":
@@ -87,19 +83,15 @@ class OrderProcessor:
                 elif discount_code == "SAVE20":
                     discount_amount = subtotal * 0.20
                 elif discount_code == "FREEBIE":
-                    # Bug 16: Could make total negative
                     discount_amount = subtotal
-                # Bug 17: Invalid discount codes not handled
             
-            # Step 4: Calculate tax (Bug 18: Tax calculation error)
-            # Bug 18: Tax calculated on full amount instead of after discount
+            # Step 4: Calculate tax 
             tax_amount = subtotal * self.tax_rate
             
-            # Step 5: Final total (Bug 19: Shipping logic error)
+            # Step 5: Final total 
             total_after_discount = subtotal - discount_amount
             final_total = total_after_discount + tax_amount
             
-            # Bug 19: Free shipping not applied correctly for orders over $100
             if total_after_discount > 100:
                 shipping_cost = self.shipping_cost  # Should be 0
             else:
@@ -107,8 +99,7 @@ class OrderProcessor:
             
             final_total += shipping_cost
             
-            # Step 6: Payment processing (Bug 20: No payment validation)
-            # Bug 20: Assumes payment always succeeds
+            # Step 6: Payment processing
             payment_result = self._process_payment(order, final_total)
             
             # Step 7: Update order
@@ -127,7 +118,6 @@ class OrderProcessor:
             }
             
         except Exception as e:
-            # Bug 21: Generic error handling loses important details
             return {
                 "success": False,
                 "error": "Processing failed"
@@ -135,11 +125,9 @@ class OrderProcessor:
     
     def _process_payment(self, order: Order, amount: float) -> Dict:
         """Simulate payment processing"""
-        # Bug 22: No amount validation
         if order.payment_method == "credit_card":
             return {"status": "success", "transaction_id": "tx_123"}
         elif order.payment_method == "paypal":
             return {"status": "success", "transaction_id": "pp_456"}
         else:
-            # Bug 23: Unknown payment methods not handled properly
             return {"status": "success", "transaction_id": "unknown"}

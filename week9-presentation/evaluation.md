@@ -65,16 +65,16 @@ Students should discover **at least 7 intentional bugs** hidden in the complex `
 **Possible Bug Discovery Checklist:**
 | Bug # | Description | Actual Behavior | Expected Behavior |
 |-------|-------------|----------------|------------------|
-| 15 | Incomplete order validation | Missing checks for customer_id, items, payment_method | Validates all required fields |
-| 16 | No validation for negative quantities or prices | Accepts negative values | Rejects negative quantities/prices |
-| 17 | "FREEBIE" discount can make total negative | Total becomes negative | Ensures total is never negative |
-| 18 | Invalid discount codes not handled | Ignores invalid codes | Raises error for invalid discount codes |
-| 19 | Tax calculated on pre-discount amount | Calculates tax before discount | Calculates tax after discount |
-| 20 | Free shipping logic broken | Charges shipping for orders > $100 | Free shipping for orders > $100 |
-| 21 | Payment processing assumes success | No validation of payment | Validates payment and handles failures |
-| 22 | Generic error handling loses important failure details | Returns generic error | Returns specific error details |
-| 23 | Payment amount not validated | Accepts negative payment amounts | Rejects negative payment amounts |
-| 24 | Unknown payment methods not properly rejected | Accepts unknown methods | Rejects unknown payment methods |
+| 1 | Incomplete order validation | Missing checks for customer_id, items, payment_method | Validates all required fields |
+| 2 | No validation for negative quantities or prices | Accepts negative values | Rejects negative quantities/prices |
+| 3 | "FREEBIE" discount can make total negative | Total becomes negative | Ensures total is never negative |
+| 4 | Invalid discount codes not handled | Ignores invalid codes | Raises error for invalid discount codes |
+| 5 | Tax calculated on pre-discount amount | Calculates tax before discount | Calculates tax after discount |
+| 6 | Free shipping logic broken | Charges shipping for orders > $100 | Free shipping for orders > $100 |
+| 7 | Payment processing assumes success | No validation of payment | Validates payment and handles failures |
+| 8 | Generic error handling loses important failure details | Returns generic error | Returns specific error details |
+| 9 | Payment amount not validated | Accepts negative payment amounts | Rejects negative payment amounts |
+| 10 | Unknown payment methods not properly rejected | Accepts unknown methods | Rejects unknown payment methods |
 
 **Decomposition Quality Assessment:**
 Students should identify these logical sub-behaviors:
