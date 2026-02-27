@@ -400,6 +400,7 @@ Generate tests for this code.
 [9] GitHub Docs: Adding repository custom instructions for GitHub Copilot (`https://docs.github.com/en/copilot/how-tos/configure-custom-instructions/add-repository-instructions`).
 
 [10] "Writing Effective Prompts for Testing Scenarios: AI Assisted Quality Engineering" by Microsoft: `https://techcommunity.microsoft.com/blog/azuredevcommunityblog/writing-effective-prompts-for-testing-scenarios-ai-assisted-quality-engineering/4488001`
+
 ---
 
 
