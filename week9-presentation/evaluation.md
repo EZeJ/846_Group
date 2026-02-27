@@ -224,11 +224,128 @@ For each failure:
 
 
 
+## 3. Problem D Evaluation
 
+### Problem D_1: Baseline Test Generation for Mini Autograd
 
+**Evaluation Description:**  
+Students generate an initial pytest suite for a pure-Python mini autograd engine and verify basic forward/backward behavior.
 
+**Possible Behavior Discovery Checklist:**
 
+| Check # | Description | Actual Baseline Behavior | Expected Behavior |
+|-------|-------------|--------------------------|------------------|
+| 1 | Runnable imports and collection | Import/collection error | Tests collect and run directly |
+| 2 | Forward scalar assertions | Missing due collection failure | Deterministic forward-value checks |
+| 3 | Backward checks for `+` and `*` | Missing due collection failure | Correct gradients asserted for both ops |
+| 4 | Custom autograd function checks | Missing due collection failure | At least one custom op tested (forward/backward) |
+| 5 | Output contract | Mixed prose/code in early runs | Single runnable test file, code-only |
 
+**Expected Results:**
+- **Without structured prompts:** likely collection failures or weak smoke tests only.
+- **With structured prompts:** runnable tests with concrete forward/backward assertions.
+
+**Measured Results:**
+- Baseline prompt: collection/import failure.
+- Guided prompt (phase 2): runnable suite, `1 passed / 4 failed`.
+
+---
+
+### Problem D_2: Graph Semantics and Edge-Case Testing
+
+**Evaluation Description:**  
+Students extend tests to graph semantics instead of only arithmetic outputs.
+
+**Possible Behavior Discovery Checklist:**
+
+| Check # | Description | Actual Baseline Behavior | Expected Behavior |
+|-------|-------------|--------------------------|------------------|
+| 1 | Shared-subgraph gradient accumulation | Missing due collection failure | Explicit accumulation assertions |
+| 2 | `requires_grad` propagation | Missing due collection failure | Propagation behavior verified |
+| 3 | `detach()` contract | Missing due collection failure | `requires_grad=False` + backward failure path |
+| 4 | `zero_grad()` semantics | Missing due collection failure | Gradient reset behavior asserted |
+| 5 | Boundary case in custom function | Missing due collection failure | At least one boundary-case gradient test |
+| 6 | Negative/exception assertion | Missing due collection failure | At least one meaningful `pytest.raises` check |
+
+**Expected Results:**
+- **Without structured prompts:** non-runnable output or shallow happy-path tests.
+- **With structured prompts:** runnable tests spanning multiple semantic categories.
+
+**Measured Results:**
+- Baseline prompt: collection/import failure.
+- Guided prompt (phase 2): runnable suite, `2 passed / 4 failed`.
+
+---
+
+### Problem D_3: Standardized `axpy(a, x, y)` Tests
+
+**Evaluation Description:**  
+All students generate tests for the same function to support fair in-class comparison.
+
+**Possible Behavior Discovery Checklist:**
+
+| Check # | Description | Actual Baseline Behavior | Expected Behavior |
+|-------|-------------|--------------------------|------------------|
+| 1 | Forward check: `a*x + y` | Missing due collection failure | Deterministic forward assertion |
+| 2 | Gradients for `a`, `x`, `y` | Missing due collection failure | Correct per-input gradient checks |
+| 3 | Gradient-order contract | Missing due collection failure | Returned gradients mapped to input order |
+| 4 | Upstream grad scaling | Missing due collection failure | `backward(grad=...)` scaling asserted |
+| 5 | Edge behavior (zero/negative/reuse) | Missing due collection failure | At least one edge case with explicit assertions |
+| 6 | Failure-path test | Missing due collection failure | At least one exception-path assertion |
+
+**Expected Results:**
+- **Without structured prompts:** often non-runnable output and missed gradient-order checks.
+- **With structured prompts:** runnable tests that expose `axpy` contract violations.
+
+**Measured Results:**
+- Baseline prompt: collection/import failure.
+- Guided prompt (phase 2): runnable suite, `2 passed / 4 failed`.
+
+---
+
+### Problem D_4: Bug-Fix Verification with Official Tests
+
+**Evaluation Description:**  
+Students fix starter-code bugs using their generated tests, then validate against official tests.
+
+**Possible Bug Discovery Checklist:**
+
+| Bug # | Description | Actual Starter Behavior | Expected Behavior |
+|-------|-------------|------------------------|------------------|
+| 1 | Root backward ignores upstream gradient | Uses `1.0` always | Uses provided upstream `grad` |
+| 2 | Multiplication second-input gradient wrong | Misses chain factor | Uses `out.grad * self.data` |
+| 3 | `__add__` grad propagation with constant wrong | Requires both inputs grad-enabled | Requires grad if either input does |
+| 4 | `detach()` keeps grad tracking | Detached tensor still tracks grad | Detached tensor should not track grad |
+| 5 | `zero_grad()` reset policy wrong | Sets grad to `None` | Resets grad to `0.0` |
+| 6 | `relu()` positive-slope bug (case 1) | Uses slope `0.5` | Uses slope `1.0` |
+| 7 | `relu()` positive-slope bug (case 2) | Uses slope `0.5` | Uses slope `1.0` |
+| 8 | `exp()` derivative wrong | Uses `x` instead of `exp(x)` | Uses forward output `exp(x)` |
+| 9 | `axpy` backward gradient order mismatch | Returns `(grad_x, grad_a, grad_y)` | Returns `(grad_a, grad_x, grad_y)` |
+| 10 | `clamp01` grad for `x < 0` wrong | Returns `1` | Returns `0` |
+| 11 | `clamp01` grad for `0 < x < 1` wrong | Returns `0` | Returns `1` |
+| 12 | `clamp01` grad for `x > 1` wrong | Returns `1` | Returns `0` |
+
+**Expected Results:**
+- **Without structured prompts:** fixes target obvious failures but miss boundary/contract details.
+- **With structured prompts:** fixes are more focused with fewer regressions.
+
+**Measured Results:**
+- Baseline patch: `14/18` official tests passed.
+- Guided patch (phase 1): `10/18` official tests passed.
+- Guided patch (phase 2): `14/18` official tests passed.
+
+---
+
+### Problem D: Guided vs. Unguided Summary
+
+| Problem | Baseline Outcome | Guided Outcome (Phase 2) | Guided Better? |
+|-------|-------------------|--------------------------|----------------|
+| D_1 | collection error | runnable (`1 passed / 4 failed`) | Yes |
+| D_2 | collection error | runnable (`2 passed / 4 failed`) | Yes |
+| D_3 | collection error | runnable (`2 passed / 4 failed`) | Yes |
+| D_4 | `14/18` official tests passed | `14/18` official tests passed | Tie |
+
+---
 
 
 ## 3. References
