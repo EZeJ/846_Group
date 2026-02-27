@@ -26,28 +26,6 @@ When asking an LLM to generate or improve tests, explicitly state:
 Clear scope reduces ambiguity, so the model produces more relevant and accurate tests instead of generic or off-target output. LLM testing results depend heavily on prompt quality/prompt engineering and that prompt design [6].
 
 **Good Example:**
-“Generate pytest unit tests for parse_invoice(json_str) only. Cover valid input, missing required fields, malformed JSON, and currency normalization. Do not test database calls or network retries. Use parameterized tests and clear assertion messages.”
-
-**Bad Example:**  
-“Write tests for this.”
-
----
-
-### Guideline 2: Use a Generate–Validate–Repair Loop Instead of One-Shot Generation
-**Description:**  
-Adopt a QA workflow where LLM-generated tests go through an automated repair loop:
-1. Generate tests
-2. Compile and run
-3. Parse failures (imports, mocks, wrong API usage, assertion mismatch)
-4. Feed specific failure feedback back to the model
-5. Regenerate/fix
-6. Re-validate
-Stop after a small number of iterations and escalate to human review.
-
-**Reasoning:**  
-A generate–validate–repair loop is more effective than  one-shot generation because test creation is an iterative quality-control task, not a single prediction task: even when generated output looks plausible, hidden issues such as incorrect assumptions, weak assertions, incompatibilities with the local codebase, or syntactic/runtime failures may remain undetected until execution and validation. Prior work shows that LLM-generated unit tests frequently suffer from compilation errors and execution/correctness issues, and that iterative refinement can improve outcomes [4], [5]. By explicitly validating the output and feeding back concrete failures, the process converts vague generation into a controlled refinement cycle, which improves reliability, reduces silent errors, and makes the final tests better aligned with actual behavior and project constraints [5].
-
-**Good Example:**  
 ```
 Generate pytest unit tests for `CheckoutService.process_checkout` in `checkout_service.py`.
 
@@ -72,14 +50,35 @@ Parametrize: quantity in {2,3,4}; subtotal at $74.99/$75/$99.99/$100; shipping b
 State any assumptions as inline comments. Return only the test file.
 ```
 
-After compile errors:
+**Bad Example:** 
 ```
-Here are the compiler errors from your previous tests:
+Generate tests for this code.
+```
 
-CustomerType enum not found
+---
 
-wrong method signature for getTotal()
-Please fix the tests using these exact errors and regenerate only the failing test methods.
+### Guideline 2: Use a Generate–Validate–Repair Loop Instead of One-Shot Generation
+**Description:**  
+Adopt a QA workflow where LLM-generated tests go through an automated repair loop:
+1. Generate tests
+2. Compile and run
+3. Parse failures (imports, mocks, wrong API usage, assertion mismatch)
+4. Feed specific failure feedback back to the model
+5. Regenerate/fix
+6. Re-validate
+Stop after a small number of iterations and escalate to human review.
+
+**Reasoning:**  
+A generate–validate–repair loop is more effective than  one-shot generation because test creation is an iterative quality-control task, not a single prediction task: even when generated output looks plausible, hidden issues such as incorrect assumptions, weak assertions, incompatibilities with the local codebase, or syntactic/runtime failures may remain undetected until execution and validation. Prior work shows that LLM-generated unit tests frequently suffer from compilation errors and execution/correctness issues, and that iterative refinement can improve outcomes [4], [5]. By explicitly validating the output and feeding back concrete failures, the process converts vague generation into a controlled refinement cycle, which improves reliability, reduces silent errors, and makes the final tests better aligned with actual behavior and project constraints [5].
+
+**Good Example:**  
+```
+Running the tests produced these failures:
+
+[ERROR COPIED]
+
+Are these bugs in the tests or the implementation? Explain the root cause
+and return a corrected test file. Do not modify checkout_service.py.
 ```
 
 **Bad Example**
