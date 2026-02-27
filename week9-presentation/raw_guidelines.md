@@ -138,15 +138,23 @@ Ask LLM to fix only the failing tests (not the code) using only the error messag
 
 ## 2. Guidelines from from any related research/grey literature like practitioner or developer tool blogs
 
-### Guideline 1: [Short, Actionable Title]
+### Guideline 1: Provide Rich Context and Clear Instructions
 **Description:**  
-State the guideline clearly and concretely.
+ When writing prompts clearly describe the application type (web, mobile, UI, API), the business domain, the feature or workflow under test, and the relevant user roles or API consumers. Business rules, constraints, assumptions, and exclusions should also be explicitly stated. Where possible, include structured instructions in an Instructions .md file and pass it as context to the Copilot agent. You can also attach supporting assets—such as Swagger screenshots or UI flow diagrams—to further ground the AI’s understanding. The result is more concise, accurate output that aligns closely with your system’s real behavior and constraints.
 
 **Reasoning:**  
-Explain *why* this guideline is important, referencing readings and external sources where relevant.
+Copilot works best when it understands the surrounding context of what you are testing. The richer the context, the higher the quality of the output—whether you are generating manual test cases, automation scripts, or regression insights.
 
 **Example:**  
-Provide a brief illustrative example (code or pseudo-code if helpful).
+![alt text](image.png)
+
+![alt text](image-1.png)
+
+Below example shows how to give clear instructions to GHCP that helps AI to handle the uncertainty and exceptions to adhere
+
+
+
+![alt text](image-2.png)
 
 ---
 
@@ -162,7 +170,7 @@ Provide a brief illustrative example (code or pseudo-code if helpful).
 
 ## 3. Guidelines from LLMs
 
-### Guideline 1: [Short, Actionable Title]
+### Guideline 3.1: [Short, Actionable Title]
 **Description:**  
 State the guideline clearly and concretely.
 
