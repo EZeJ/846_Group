@@ -54,6 +54,15 @@ See `data_parser.py` in the Problem_B_3 folder.
 
 ---
 
+### Problem C: Reach target test coverage
+
+Generate tests for FLASK `app.py` file and 
+use `eval_test_coverage.py` to measure how well LLM-generated tests cover the functionality in it. 
+
+**Target source file:** `flask/src/flask/app.py` (435 executable lines)
+**Coverage goal:** ≥ 60%
+
+Additional details in `week9-presentation/problems/problem_C/README.md`
 
 ## 2. References
 

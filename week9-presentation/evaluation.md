@@ -151,6 +151,62 @@ You should compare bugs found using the checklist below with the bugs.
 
 ### GUIDED vs. UNGUIDED COVERAGE COMPARISON
 
+**Unguided prompt**:
+
+Write tests for app.py. Make sure they pass.
+
+**Guided Prompt**:
+
+*Step 1 prompt:*
+```
+Read Flask's app.py. For each of these behavior groups only, describe
+the intended behavior — inputs, return values, exceptions, branches:
+
+1. Response type handling  – str, bytes, dict/JSON, tuples
+2. make_response()         – valid inputs, invalid types
+3. Error handling          – 404, 405, 500, custom handlers
+4. Request context         – setup and teardown
+5. URL building (url_for)  – valid routes, missing params, unknown endpoint
+6. Request hooks           – before_request, after_request, teardown_request
+7. Static files            – send_static_file, open_resource
+
+Do not write any code yet.
+```
+
+*Step 2 prompt:*
+```
+Using the descriptions above, write pytest tests for app.py.
+
+For each of the 7 groups write a separate test group. For every described
+behavior, branch, and edge case include:
+  - 1 happy-path test
+  - 1 boundary test (None, empty, zero, min/max)
+  - 1 negative/exception test (invalid input, wrong type, missing route)
+
+Assertions must match the described behavior exactly — do not guess.
+
+Constraints:
+  - pytest with app/client fixtures
+  - never call internal methods directly — use test_client() or
+    test_request_context() only
+  - do not test blueprints, CLI, or async
+  - all tests must pass with: pytest test_app_py.py
+```
+
+*Step 3 prompt (after running pytest --tb=short -q):*
+```
+Here are the pytest failures:
+
+<paste exact pytest output>
+
+For each failure:
+  1. Identify the root cause from the error message only
+  2. Fix only the failing test — do not modify passing tests
+  3. Regenerate only the fixed test methods
+```
+
+**Expected Results**:
+
 | Metric            | Unguided | Guided |
 |------------------:|---------:|-------:|
 | Coverage %        | 28.3%    | 61.6%  |
