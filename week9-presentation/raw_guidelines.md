@@ -138,8 +138,6 @@ Ask LLM to fix only the failing tests (not the code) using only the error messag
 
 ## 2. Guidelines from from any related research/grey literature like practitioner or developer tool blogs
 
-> **Note:** Guidelines should be actionable, specific, and usable during real coding tasks.
-
 ### Guideline 1: [Short, Actionable Title]
 **Description:**  
 State the guideline clearly and concretely.
@@ -163,8 +161,6 @@ Provide a brief illustrative example (code or pseudo-code if helpful).
 ---
 
 ## 3. Guidelines from LLMs
-
-> **Note:** Guidelines should be actionable, specific, and usable during real coding tasks.
 
 ### Guideline 1: [Short, Actionable Title]
 **Description:**  

@@ -2,15 +2,6 @@
 
 **Authors:** Liliana Hotsko, Alina Lytovchenko, Sofiia Tkach, Zesheng(Ethan) Jia
 
-## Relevant Guidelines per Problem
-
-| Question | Guidelines |
-|---------|------------|
-|   A | 1, 2 |
-|   B_1| 3 |
-|   B_2 | 4      |
-|   B_3 |  3 , 4 |
-
 ## 1. Example Problems
 
 > All tasks should be completed in Python using pytest. Use the GPT-4.1 model. For testing, use the `@pytest.mark.parametrize` decorator to efficiently check multiple input cases and uncover bugs in the functions.

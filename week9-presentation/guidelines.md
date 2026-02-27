@@ -9,9 +9,23 @@
 * Evaluating and Improving ChatGPT for Unit Test Generation [5]
 * Large Language Models for Software Testing: A Research Roadmap [6]
 
-## 1. Guidelines
+## Relevant Guidelines per Problem
 
-> **Note:** Guidelines should be actionable, specific, and usable during real coding tasks.
+| Question | Guidelines |
+|---------|------------|
+|   A | 1, 2 |
+|   B_1| 3 |
+|   B_2 | 4      |
+|   B_3 |  3 , 4 |
+|   С |  5 |
+| D | 6, 7, 8 |
+| D_1 | 6, 7 |
+| D_2 | 6, 7, 8 |
+| D_3 | 6, 7, 8 |
+| D_4 | 7, 8 |
+
+
+## 1. Guidelines for Testing
 
 ### Guideline 1: Specify the Testing Goal and Scope in the Prompt
 **Description:**  
