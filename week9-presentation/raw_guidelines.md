@@ -136,7 +136,7 @@ Ask LLM to fix only the failing tests (not the code) using only the error messag
 - Without decomposition, it loses track of responsibilities in large modules
 
 
-#### Guideline 1.5: Explicitly Require Boundary, Negative, and Exception Tests
+### Guideline 1.5: Explicitly Require Boundary, Negative, and Exception Tests
 **Description:**  
 In the first prompt, explicitly request non-happy-path categories:
 * boundaries (min/max/empty/off-by-one),
@@ -161,7 +161,7 @@ Write tests for parse_invoice.
 
 ---
 
-#### Guideline 1.6: Decompose Complex Functions Before Test Generation
+### Guideline 1.6: Decompose Complex Functions Before Test Generation
 **Description:**  
 Use a two-step workflow for large functions:
 1. ask the model to list behavior groups,  
@@ -238,7 +238,7 @@ Below example shows how to give clear instructions to GHCP that helps AI to hand
 
 ---
 
-#### Guideline 2.2: Gate on Syntax and Collection Before Semantic Debugging
+### Guideline 2.2: Gate on Syntax and Collection Before Semantic Debugging
 **Description:**  
 Run a lightweight executability gate first:
 * `python -m py_compile <test_file.py>`
@@ -262,7 +262,7 @@ Ignore import errors; focus on expected values first.
 
 ---
 
-#### Guideline 2.3: Standardize Prompt Constraints at Repository Level
+### Guideline 2.3: Standardize Prompt Constraints at Repository Level
 **Description:**  
 Define shared constraints once for the team (framework, output format, forbidden edits, deterministic inputs) and reuse in every prompt.
 
@@ -290,7 +290,7 @@ No team constraints; each student writes ad-hoc prompts.
 **Model(s) used:** GitHub Copilot CLI (`gpt-5-mini`) and GPT-5.2 (Codex CLI)  
 **Prompt interaction pattern:** baseline prompt → constrained prompt → failure-log repair prompt
 
-#### Guideline 3.1: Force Code-Only Output with Fixed Import Root
+### Guideline 3.1: Force Code-Only Output with Fixed Import Root
 **Description:**  
 Constrain output and imports:
 * code-only response,
@@ -316,7 +316,7 @@ Explain your approach first, then provide test ideas.
 
 ---
 
-#### Guideline 3.2: Use Failure-Scoped Repair Prompts (Minimal Diff)
+### Guideline 3.2: Use Failure-Scoped Repair Prompts (Minimal Diff)
 **Description:**  
 After a failed run, request a minimal patch to only failing imports/tests/assertions instead of regenerating the full suite.
 
