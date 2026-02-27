@@ -182,6 +182,42 @@ Generate all tests for process_order in one shot.
 ```
 
 
+
+
+
+
+
+
+
+### Guideline 1.5: Use a Generate–Validate–Repair Loop Instead of One-Shot Generation
+**Description:**  
+Adopt a QA workflow where LLM-generated tests go through an automated repair loop:
+1. Generate tests
+2. Compile and run
+3. Parse failures (imports, mocks, wrong API usage, assertion mismatch)
+4. Feed specific failure feedback back to the model
+5. Regenerate/fix
+6. Re-validate
+Stop after a small number of iterations and escalate to human review.
+
+**Reasoning:**  
+A generate–validate–repair loop is more effective than  one-shot generation because test creation is an iterative quality-control task, not a single prediction task: even when generated output looks plausible, hidden issues such as incorrect assumptions, weak assertions, incompatibilities with the local codebase, or syntactic/runtime failures may remain undetected until execution and validation. Prior work shows that LLM-generated unit tests frequently suffer from compilation errors and execution/correctness issues, and that iterative refinement can improve outcomes [4], [5]. By explicitly validating the output and feeding back concrete failures, the process converts vague generation into a controlled refinement cycle, which improves reliability, reduces silent errors, and makes the final tests better aligned with actual behavior and project constraints [5].
+
+**Good Example:**  
+```
+Running the tests produced these failures:
+
+[ERROR COPIED]
+
+Are these bugs in the tests or the implementation? Explain the root cause
+and return a corrected test file. Do not modify checkout_service.py.
+```
+
+**Bad Example**
+* Generating tests once, seeing compile errors, and discarding AI testing entirely.
+* Re-prompting with “fix it” but without providing concrete error messages.
+* Running infinite regeneration loops until something passes by chance.
+
 ## 2. Guidelines from from any related research/grey literature like practitioner or developer tool blogs
 
 ### Guideline 2.1: Provide Rich Context and Clear Instructions
@@ -297,6 +333,48 @@ Patch only failing tests/imports. Do not rewrite passing tests.
 *Bad prompt:*  
 ```text
 Rewrite the entire test suite from scratch.
+```
+
+### Guideline 3.3: Specify the Testing Goal and Scope in the Prompt
+**Description:**  
+When asking an LLM to generate or improve tests, explicitly state:
+* test level (unit / integration / API / E2E),
+* target function/module,
+* expected behavior,
+* constraints (framework, style, mocks, side effects),
+* what not to test
+
+**Reasoning:**  
+Clear scope reduces ambiguity, so the model produces more relevant and accurate tests instead of generic or off-target output. LLM testing results depend heavily on prompt quality/prompt engineering and that prompt design [6].
+
+**Good Example:**
+```
+Generate pytest unit tests for `CheckoutService.process_checkout` in `checkout_service.py`.
+
+Framework: pytest + `unittest.mock.MagicMock` for `InventoryService` and `PaymentGateway`.
+Use `@pytest.mark.parametrize` for boundary values. Use `pytest.raises(CheckoutError)` for all error paths.
+Do NOT test the external dependencies themselves.
+
+Cover each rule with at least one test:
+
+- Empty cart -> CheckoutError
+- Stock check: error when out of stock, success when in stock
+- Flash-sale discount (5%), bundle discount (quantity >= 3, 5%)
+- SAVE10 (10%, min $100), SUMMER20 (20% capped at $30, min $75), FLASH5 (5% on flash items)
+- VIP discount (15%) incompatible with all coupons; FLASH5 incompatible with VIP
+- Loyalty credit applied only when points >= 500
+- Shipping: $10 if discounted subtotal < $50, else $0
+- Tax: 13% on post-discount, post-loyalty-credit amount
+- Payment failure -> CheckoutError
+- Total must never be negative
+
+Parametrize: quantity in {2,3,4}; subtotal at $74.99/$75/$99.99/$100; shipping boundary at $49.99/$50/$50.01.
+State any assumptions as inline comments. Return only the test file.
+```
+
+**Bad Example:** 
+```
+Generate tests for this code.
 ```
 
 ---
