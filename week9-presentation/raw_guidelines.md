@@ -115,6 +115,27 @@ def calculate_discount(price: float, code: str) -> float:
 ```
 ---
 
+### Guideline 1.4: Use a structured 3-step prompt to maximise test coverage
+
+**Description:**
+Instead of asking an LLM to generate tests in one shot, use a fixed three-step prompt sequence that combines scope, intention, decomposition, edge cases, and a repair loop:
+
+**Step 1 — Describe intention per behavior group (no code yet)**
+Scope the target module into its distinct behavior groups, then ask the LLM to describe the intended behavior of each group.
+
+**Step 2 — Generate tests using the description**
+For every described behavior, branch, and edge case require different types of tests.
+
+Also, include explicit constraints, like test framework, what not to test, and how methods must be invoked.
+
+**Step 3 — Repair failures**
+Ask LLM to fix only the failing tests (not the code) using only the error message as evidence.
+
+**Reasoning:**
+- Without intention-first, it writes assertions that misrepresent actual behavior — over 85% of execution failures stem from incorrect assertions, not bugs [5]
+- Without decomposition, it loses track of responsibilities in large modules
+
+
 ## 2. Guidelines from from any related research/grey literature like practitioner or developer tool blogs
 
 > **Note:** Guidelines should be actionable, specific, and usable during real coding tasks.

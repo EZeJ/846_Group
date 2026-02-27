@@ -170,7 +170,7 @@ Constraints: don’t test DB/network; use mocks; clear assertions.”
 
 ---
 
-### Guideline 5: Use a Structured Three-Step Prompt to Maximise Test Coverage
+### Guideline 5: Use a structured 3-step prompt to maximise test coverage
 
 **Description:**
 Instead of asking an LLM to generate tests in one shot, use a fixed three-step prompt sequence that combines scope, intention, decomposition, edge cases, and a repair loop:
@@ -228,6 +228,7 @@ For each failure:
   3. Regenerate only the fixed test methods
 ```
 
+P.S. The guideline and the prompt examples where rephrased and improved by GPT-5.
 ---
 
 
