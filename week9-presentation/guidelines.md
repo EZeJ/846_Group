@@ -232,6 +232,94 @@ P.S. The guideline and the prompt examples where rephrased and improved by GPT-5
 ---
 
 
+### Guideline 6: Specify Testing Scope and Execution Contract in the Prompt
+**Description:**  
+When asking an LLM to generate tests, always define:
+* target module/function,
+* test framework (`pytest`, `JUnit`),
+* required behavior categories (happy path, boundaries, failures),
+* import root/path assumptions,
+* output format (code-only, single file),
+* strict constraints (do not edit implementation files).
+
+**Reasoning:**  
+Prompt quality strongly affects test quality and executability [1], [2], [5], [6]. Explicit execution constraints reduce non-runnable output and improve reproducibility in team evaluation settings [9].
+
+**Good Example:**
+```text
+Generate pytest tests for `billing/discounts.py::apply_coupon`.
+Assume execution from repository root.
+Use: `from billing.discounts import apply_coupon`.
+Include: happy path + boundary values + invalid-input exceptions.
+Do not modify implementation files. Return one runnable test file only.
+```
+
+**Bad Example:**
+```text
+Write tests for this file. Make sure they pass.
+```
+
+---
+
+### Guideline 7: Use a Generate–Validate–Repair Loop Instead of One-Shot Generation
+**Description:**  
+Treat generated tests as drafts:
+1. generate test code,
+2. run syntax/import gate (`py_compile`, `pytest --collect-only`),
+3. run tests and capture short failures,
+4. ask for targeted fixes to failing parts only,
+5. re-run with bounded iterations.
+
+**Reasoning:**  
+Empirical work and practitioner reports show one-shot outputs often contain execution and assertion issues; iterative repair materially improves usefulness [3], [4], [5], [7], [8].
+
+**Good Example:**
+```text
+These tests fail with:
+[PASTE SHORT TRACEBACK]
+
+Patch only failing tests/imports.
+Do not rewrite passing tests.
+Do not edit implementation code.
+Return code only.
+```
+
+**Bad Example:**
+```text
+Fix it.
+```
+
+---
+
+### Guideline 8: Require Strong Coverage + Strong Assertions, Then Verify with an Independent Suite
+**Description:**  
+Require both coverage breadth and assertion strength:
+* boundary values and off-by-one cases,
+* null/missing and malformed inputs,
+* explicit exception-path checks (`pytest.raises`),
+* invariant/property checks where applicable.
+
+Then verify against an independent oracle (official tests, hidden grader, or reference suite).
+
+**Reasoning:**  
+LLM-generated suites often overfit happy paths and miss critical failure behavior [2], [5]. Independent verification is needed to avoid false confidence from weak or redundant assertions [1], [6].
+
+**Good Example:**
+```text
+For `parse_record`, include:
+- 2 boundary tests,
+- 2 malformed-input tests with `pytest.raises`,
+- 1 invariant test.
+
+After generation, run the independent grader and report missed categories.
+```
+
+**Bad Example:**
+```text
+Generate a few basic tests that run.
+```
+
+
 ## 2. References
 
 [1] Wang, J., et al. "Software Testing with Large Language Models: Survey, Landscape, and Vision" IEEE Transactions on Software Engineering (2024). DOI: 10.1109/TSE.2024.3368208.
@@ -245,6 +333,12 @@ P.S. The guideline and the prompt examples where rephrased and improved by GPT-5
 [5] Yuan, Z., et al. "Evaluating and Improving ChatGPT for Unit Test Generation" Proceedings of the ACM on Software Engineering 1(FSE), 1703–1726 (2024). DOI: 10.1145/3660783.
 
 [6] Augusto, C., Bertolino, A., De Angelis, G., Lonetti, F., and Morán, J. "Large Language Models for Software Testing: A Research Roadmap" arXiv preprint (2025).
+
+[7] pytest docs: Assertions and expected exceptions (`https://docs.pytest.org/en/stable/how-to/assert.html`).
+
+[8] Python docs: `py_compile` (`https://docs.python.org/3/library/py_compile.html`).
+
+[9] GitHub Docs: Adding repository custom instructions for GitHub Copilot (`https://docs.github.com/en/copilot/how-tos/configure-custom-instructions/add-repository-instructions`).
 
 ---
 

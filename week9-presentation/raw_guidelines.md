@@ -186,6 +186,157 @@ Provide a brief illustrative example (code or pseudo-code if helpful).
 ### Guideline N: [Short, Actionable Title]
 (Repeat the same structure for each guideline.)
 
+
+## 4. Problem D Raw Guidelines
+
+### 4.1 Guidelines from Readings
+
+#### Guideline 4.1.1: Explicitly Require Boundary, Negative, and Exception Tests
+**Description:**  
+In the first prompt, explicitly request non-happy-path categories:
+* boundaries (min/max/empty/off-by-one),
+* null/missing fields,
+* malformed input,
+* exception-triggering inputs.
+
+**Reasoning:**  
+Assigned readings show LLMs default to easy happy-path tests and miss bug-revealing inputs unless these categories are required explicitly [1], [2], [5].
+
+**Example:**
+*Good prompt:*  
+```text
+Generate pytest tests for `parse_invoice`.
+Include: 2 boundary tests, 2 malformed-input tests, and 2 exception-path tests.
+Return code only.
+```
+*Bad prompt:*  
+```text
+Write tests for parse_invoice.
+```
+
+---
+
+#### Guideline 4.1.2: Decompose Complex Functions Before Test Generation
+**Description:**  
+Use a two-step workflow for large functions:
+1. ask the model to list behavior groups,  
+2. generate tests per behavior group.
+
+**Reasoning:**  
+For multi-responsibility functions, one-shot generation reduces focus and branch coverage. Decomposition improves alignment between behavior and assertions [1], [5], [6].
+
+**Example:**
+*Good prompt:*  
+```text
+Step 1: List behavior groups in `process_order` (validation, pricing, discount, errors).
+Step 2: Generate pytest tests per group, including one boundary and one failure case each.
+```
+*Bad prompt:*  
+```text
+Generate all tests for process_order in one shot.
+```
+
+---
+
+### 4.2 Guidelines from Related Research / Grey Literature
+
+#### Guideline 4.2.1: Gate on Syntax and Collection Before Semantic Debugging
+**Description:**  
+Run a lightweight executability gate first:
+* `python -m py_compile <test_file.py>`
+* `pytest --collect-only -q <test_file.py>`
+
+Then repair imports/syntax/path issues before assertion tuning.
+
+**Reasoning:**  
+Practitioner workflows emphasize isolating structural failures early to avoid wasting iterations on semantic debugging when tests cannot run [7], [8].
+
+**Example:**
+*Good prompt:*  
+```text
+Collection fails with ImportError.
+Patch only imports/path assumptions. Keep assertions unchanged.
+```
+*Bad prompt:*  
+```text
+Ignore import errors; focus on expected values first.
+```
+
+---
+
+#### Guideline 4.2.2: Standardize Prompt Constraints at Repository Level
+**Description:**  
+Define shared constraints once for the team (framework, output format, forbidden edits, deterministic inputs) and reuse in every prompt.
+
+**Reasoning:**  
+Repository-level instructions reduce prompt drift and improve comparability during class-wide evaluation [9].
+
+**Example:**
+*Good prompt header:*  
+```text
+Team constraints:
+- pytest only
+- one code file, no prose
+- do not edit implementation
+- include happy, edge, and failure tests
+```
+*Bad prompt header:*  
+```text
+No team constraints; each student writes ad-hoc prompts.
+```
+
+---
+
+### 4.3 Guidelines from LLM Prompting Interactions
+
+**Model(s) used:** GitHub Copilot CLI (`gpt-5-mini`) and GPT-5.2 (Codex CLI)  
+**Prompt interaction pattern:** baseline prompt → constrained prompt → failure-log repair prompt
+
+#### Guideline 4.3.1: Force Code-Only Output with Fixed Import Root
+**Description:**  
+Constrain output and imports:
+* code-only response,
+* fixed project-root import style,
+* no command execution in response,
+* no implementation edits.
+
+**Reasoning:**  
+In our runs, non-runnable output (mixed prose/code, wrong imports) was a frequent failure source. Tight output constraints improved executability and scoring consistency.
+
+**Example:**
+*Good prompt:*  
+```text
+Return one runnable pytest file only.
+Assume repository-root execution.
+Use `from package.module import ...`.
+No markdown fences and no prose.
+```
+*Bad prompt:*  
+```text
+Explain your approach first, then provide test ideas.
+```
+
+---
+
+#### Guideline 4.3.2: Use Failure-Scoped Repair Prompts (Minimal Diff)
+**Description:**  
+After a failed run, request a minimal patch to only failing imports/tests/assertions instead of regenerating the full suite.
+
+**Reasoning:**  
+Failure-scoped repair preserved passing tests and reduced regressions during iterative refinement.
+
+**Example:**
+*Good prompt:*  
+```text
+Here is the failing traceback:
+[PASTE SHORT LOG]
+Patch only failing tests/imports. Do not rewrite passing tests.
+```
+*Bad prompt:*  
+```text
+Rewrite the entire test suite from scratch.
+```
+
 ---
 
 ## 4. References
@@ -202,8 +353,14 @@ Provide a brief illustrative example (code or pseudo-code if helpful).
 
 [6] Augusto, C., Bertolino, A., De Angelis, G., Lonetti, F., and Morán, J. "Large Language Models for Software Testing: A Research Roadmap" arXiv preprint (2025).
 
+[7] pytest docs: Good integration practices (`https://docs.pytest.org/en/stable/explanation/goodpractices.html`).
+
+[8] Python docs: `py_compile` (`https://docs.python.org/3/library/py_compile.html`).
+
+[9] GitHub Docs: Adding repository custom instructions for GitHub Copilot (`https://docs.github.com/en/copilot/how-tos/configure-custom-instructions/add-repository-instructions`).
+
 ---
 
 
----
+
 
