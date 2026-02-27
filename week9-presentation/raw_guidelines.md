@@ -136,64 +136,7 @@ Ask LLM to fix only the failing tests (not the code) using only the error messag
 - Without decomposition, it loses track of responsibilities in large modules
 
 
-## 2. Guidelines from from any related research/grey literature like practitioner or developer tool blogs
-
-### Guideline 1: Provide Rich Context and Clear Instructions
-**Description:**  
- When writing prompts clearly describe the application type (web, mobile, UI, API), the business domain, the feature or workflow under test, and the relevant user roles or API consumers. Business rules, constraints, assumptions, and exclusions should also be explicitly stated. Where possible, include structured instructions in an Instructions .md file and pass it as context to the Copilot agent. You can also attach supporting assets—such as Swagger screenshots or UI flow diagrams—to further ground the AI’s understanding. The result is more concise, accurate output that aligns closely with your system’s real behavior and constraints. [10]
-
-**Reasoning:**  
-Copilot works best when it understands the surrounding context of what you are testing. The richer the context, the higher the quality of the output—whether you are generating manual test cases, automation scripts, or regression insights.
-
-**Example:**  
-![alt text](image.png)
-
-![alt text](image-1.png)
-
-Below example shows how to give clear instructions to GHCP that helps AI to handle the uncertainty and exceptions to adhere
-
-![alt text](image-2.png)
-
----
-
-### Guideline 2: [Short, Actionable Title]
-(Repeat the same structure for each guideline.)
-
----
-
-### Guideline N: [Short, Actionable Title]
-(Repeat the same structure for each guideline.)
-
----
-
-## 3. Guidelines from LLMs
-
-### Guideline 3.1: [Short, Actionable Title]
-**Description:**  
-State the guideline clearly and concretely.
-
-**Reasoning:**  
-Explain *why* this guideline is important, referencing readings and external sources where relevant.
-
-**Example:**  
-Provide a brief illustrative example (code or pseudo-code if helpful).
-
----
-
-### Guideline 2: [Short, Actionable Title]
-(Repeat the same structure for each guideline.)
-
----
-
-### Guideline N: [Short, Actionable Title]
-(Repeat the same structure for each guideline.)
-
-
-## 4. Problem D Raw Guidelines
-
-### 4.1 Guidelines from Readings
-
-#### Guideline 4.1.1: Explicitly Require Boundary, Negative, and Exception Tests
+#### Guideline 1.5: Explicitly Require Boundary, Negative, and Exception Tests
 **Description:**  
 In the first prompt, explicitly request non-happy-path categories:
 * boundaries (min/max/empty/off-by-one),
@@ -218,7 +161,7 @@ Write tests for parse_invoice.
 
 ---
 
-#### Guideline 4.1.2: Decompose Complex Functions Before Test Generation
+#### Guideline 1.6: Decompose Complex Functions Before Test Generation
 **Description:**  
 Use a two-step workflow for large functions:
 1. ask the model to list behavior groups,  
@@ -238,11 +181,28 @@ Step 2: Generate pytest tests per group, including one boundary and one failure 
 Generate all tests for process_order in one shot.
 ```
 
+
+## 2. Guidelines from from any related research/grey literature like practitioner or developer tool blogs
+
+### Guideline 2.1: Provide Rich Context and Clear Instructions
+**Description:**  
+ When writing prompts clearly describe the application type (web, mobile, UI, API), the business domain, the feature or workflow under test, and the relevant user roles or API consumers. Business rules, constraints, assumptions, and exclusions should also be explicitly stated. Where possible, include structured instructions in an Instructions .md file and pass it as context to the Copilot agent. You can also attach supporting assets—such as Swagger screenshots or UI flow diagrams—to further ground the AI’s understanding. The result is more concise, accurate output that aligns closely with your system’s real behavior and constraints. [10]
+
+**Reasoning:**  
+Copilot works best when it understands the surrounding context of what you are testing. The richer the context, the higher the quality of the output—whether you are generating manual test cases, automation scripts, or regression insights.
+
+**Example:**  
+![alt text](image.png)
+
+![alt text](image-1.png)
+
+Below example shows how to give clear instructions to GHCP that helps AI to handle the uncertainty and exceptions to adhere
+
+![alt text](image-2.png)
+
 ---
 
-### 4.2 Guidelines from Related Research / Grey Literature
-
-#### Guideline 4.2.1: Gate on Syntax and Collection Before Semantic Debugging
+#### Guideline 2.2: Gate on Syntax and Collection Before Semantic Debugging
 **Description:**  
 Run a lightweight executability gate first:
 * `python -m py_compile <test_file.py>`
@@ -266,7 +226,7 @@ Ignore import errors; focus on expected values first.
 
 ---
 
-#### Guideline 4.2.2: Standardize Prompt Constraints at Repository Level
+#### Guideline 2.3: Standardize Prompt Constraints at Repository Level
 **Description:**  
 Define shared constraints once for the team (framework, output format, forbidden edits, deterministic inputs) and reuse in every prompt.
 
@@ -289,12 +249,12 @@ No team constraints; each student writes ad-hoc prompts.
 
 ---
 
-### 4.3 Guidelines from LLM Prompting Interactions
+## 3. Guidelines from LLMs
 
 **Model(s) used:** GitHub Copilot CLI (`gpt-5-mini`) and GPT-5.2 (Codex CLI)  
 **Prompt interaction pattern:** baseline prompt → constrained prompt → failure-log repair prompt
 
-#### Guideline 4.3.1: Force Code-Only Output with Fixed Import Root
+#### Guideline 3.1: Force Code-Only Output with Fixed Import Root
 **Description:**  
 Constrain output and imports:
 * code-only response,
@@ -320,7 +280,7 @@ Explain your approach first, then provide test ideas.
 
 ---
 
-#### Guideline 4.3.2: Use Failure-Scoped Repair Prompts (Minimal Diff)
+#### Guideline 3.2: Use Failure-Scoped Repair Prompts (Minimal Diff)
 **Description:**  
 After a failed run, request a minimal patch to only failing imports/tests/assertions instead of regenerating the full suite.
 
