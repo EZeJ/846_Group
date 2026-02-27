@@ -9,11 +9,13 @@ Students should evaluate their testing approach based on these criteria:
 * **Bug Discovery Rate:** How effectively the tests identify defects in the code.
 * **Test Coverage:** The extent to which tests cover critical paths, edge cases, and requirements.
 
+* **Assertion density:** Number of assertions per test.
+
 ---
 
 ## 2. Evaluation for Specific Example Problems
 
-### Problem A: Checkout Service Testing
+## Problem A: Checkout Service Testing
 
 **Evaluation Description:**
 Students should discover **all 9 intentional bugs** when applying both guidelines properly. A vague one-shot prompt will miss most bugs. The bugs span interacting features (item-level discounts, three coupon types, loyalty points, shipping) so only a prompt that explicitly decomposes each business rule and tests boundary/combination cases will uncover them all.
@@ -35,6 +37,8 @@ Students should discover **all 9 intentional bugs** when applying both guideline
 **Expected Results:**
 - **Without Guideline 3:** Test should find 0-4 bugs (mainly obvious ones)
 - **With Guideline 3:** Test should find 6-9 bugs (comprehensive edge case coverage)
+
+___
 
 ### Problem B_1: User Validation Testing
 
@@ -65,9 +69,12 @@ You should compare bugs found using the checklist below with the bugs.
 - **Without Guideline 3:** Should find 2-5 bugs (mainly obvious ones)
 - **With Guideline 3:** Should find 7-13 bugs (comprehensive edge case coverage)
 
+**Advice**
+- Ask an LLM to help you check how many bugs the generated tests uncover, based on this table and the tests generated from your prompt.
+
 ---
 
-### Problem B_2: Order Processing Decomposition
+## Problem B_2: Order Processing Decomposition
 
 **Evaluation Description:**  
 Students must find **at least 7** intentional bugs hidden in the complex process_order() method by applying Guideline 4. 
@@ -105,9 +112,11 @@ Students should identify these logical sub-behaviors:
 - **Without Guideline 4:** Should find 2-3 bugs (surface-level issues)
 - **With Guideline 4:** Should find 7-10 bugs (through systematic behavior testing)
 
+**Advice**
+- Ask an LLM to help you check how many bugs the generated tests uncover, based on this table and the tests generated from your prompt.
 ---
 
-### Problem B_3: Data Parser Edge Cases
+## Problem B_3: Data Parser Edge Cases
 
 **Evaluation Description:**  
 Students should discover ** at least 10 bugs** across multiple parsing functions when applying both Guidelines 3 and 4. 
@@ -147,10 +156,12 @@ You should compare bugs found using the checklist below with the bugs.
 - **Without Guidelines 3 & 4:** Should find 3-6 bugs (mainly obvious input errors and crashes)
 - **With Guidelines 3 & 4:** Should find 10-24 bugs (comprehensive edge case coverage across all parsing functions)
 
+**Advice**
+- Ask an LLM to help you check how many bugs the generated tests uncover, based on this table and the tests generated from your prompt.
 
+___
 
-
-# Problem C
+## Problem C
 
 
 ### GUIDED vs. UNGUIDED COVERAGE COMPARISON
@@ -346,12 +357,3 @@ Students fix starter-code bugs using their generated tests, then validate agains
 | D_4 | `14/18` official tests passed | `14/18` official tests passed | Tie |
 
 ---
-
-
-## 3. References
-
-[1]  
-[2] 
-
----
-
