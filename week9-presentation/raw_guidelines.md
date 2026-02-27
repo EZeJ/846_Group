@@ -140,7 +140,7 @@ Ask LLM to fix only the failing tests (not the code) using only the error messag
 
 ### Guideline 1: Provide Rich Context and Clear Instructions
 **Description:**  
- When writing prompts clearly describe the application type (web, mobile, UI, API), the business domain, the feature or workflow under test, and the relevant user roles or API consumers. Business rules, constraints, assumptions, and exclusions should also be explicitly stated. Where possible, include structured instructions in an Instructions .md file and pass it as context to the Copilot agent. You can also attach supporting assets—such as Swagger screenshots or UI flow diagrams—to further ground the AI’s understanding. The result is more concise, accurate output that aligns closely with your system’s real behavior and constraints.
+ When writing prompts clearly describe the application type (web, mobile, UI, API), the business domain, the feature or workflow under test, and the relevant user roles or API consumers. Business rules, constraints, assumptions, and exclusions should also be explicitly stated. Where possible, include structured instructions in an Instructions .md file and pass it as context to the Copilot agent. You can also attach supporting assets—such as Swagger screenshots or UI flow diagrams—to further ground the AI’s understanding. The result is more concise, accurate output that aligns closely with your system’s real behavior and constraints. [10]
 
 **Reasoning:**  
 Copilot works best when it understands the surrounding context of what you are testing. The richer the context, the higher the quality of the output—whether you are generating manual test cases, automation scripts, or regression insights.
@@ -151,8 +151,6 @@ Copilot works best when it understands the surrounding context of what you are t
 ![alt text](image-1.png)
 
 Below example shows how to give clear instructions to GHCP that helps AI to handle the uncertainty and exceptions to adhere
-
-
 
 ![alt text](image-2.png)
 
@@ -363,7 +361,9 @@ Rewrite the entire test suite from scratch.
 
 [9] GitHub Docs: Adding repository custom instructions for GitHub Copilot (`https://docs.github.com/en/copilot/how-tos/configure-custom-instructions/add-repository-instructions`).
 
+[10] "Writing Effective Prompts for Testing Scenarios: AI Assisted Quality Engineering" by Microsoft: `https://techcommunity.microsoft.com/blog/azuredevcommunityblog/writing-effective-prompts-for-testing-scenarios-ai-assisted-quality-engineering/4488001`
 ---
+
 
 
 
