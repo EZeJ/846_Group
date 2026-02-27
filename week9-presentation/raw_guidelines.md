@@ -287,7 +287,7 @@ No team constraints; each student writes ad-hoc prompts.
 
 ## 3. Guidelines from LLMs
 
-**Model(s) used:** GitHub Copilot CLI (`gpt-5-mini`) and GPT-5.2 (Codex CLI)  
+**Model(s) used:** GitHub Copilot CLI (`gpt-5-mini`), GPT-5.2 (Codex CLI), Claude Code Sonnet 4.6 
 **Prompt interaction pattern:** baseline prompt → constrained prompt → failure-log repair prompt
 
 ### Guideline 3.1: Force Code-Only Output with Fixed Import Root
