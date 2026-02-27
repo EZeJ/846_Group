@@ -1,6 +1,7 @@
 # Week 9 Guidelines: Testing / QA
 
 **Authors:** Liliana Hotsko, Alina Lytovchenko, Sofiia Tkach, Zesheng(Ethan) Jia
+
 **Readings Assigned:**  
 * Software Testing With Large Language Models: Survey, Landscape, and Vision [1]
 * On the Evaluation of Large Language Models in Unit Test Generation [2]
