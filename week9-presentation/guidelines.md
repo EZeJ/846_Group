@@ -143,6 +143,7 @@ Constraints: no database/network; use parameterized tests”
 “Write tests for `parseInvoice`. Make sure it covers the main cases and passes.”
 ```
 
+P.S. The guideline and the prompt examples where rephrased and improved by GPT-4.1.
 ---
 
 ### Guideline 4: Decompose Complex Methods Before Asking for Tests
@@ -181,7 +182,7 @@ Constraints: don’t test DB/network; use mocks; clear assertions.”
 “Write tests for `processOrder`. Generate unit tests for processOrder(Order o) that ensure it works correctly. Cover the main functionality and make sure the tests pass. Use standard assertions.”
 ```
 
-
+P.S. The guideline and the prompt examples where rephrased and improved by GPT-4.1.
 ---
 
 ### Guideline 5: Use a structured 3-step prompt to maximise test coverage
