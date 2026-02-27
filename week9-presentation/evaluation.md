@@ -32,6 +32,10 @@ Students should discover **all 9 intentional bugs** when applying both guideline
 | 8 | Payment failure not handled | `charge()` return value is ignored; checkout returns "success" even on payment failure | Raises `CheckoutError("Payment failed: <reason>")` when `charge()` returns `{"success": False, ...}` |
 | 9 | Total not floored at zero | With a large enough discount + loyalty credit, `total` can be negative | `total = max(0.0, total)` |
 
+**Expected Results:**
+- **Without Guideline 3:** Test should find 0-4 bugs (mainly obvious ones)
+- **With Guideline 3:** Test should find 6-9 bugs (comprehensive edge case coverage)
+
 ### Problem B_1: User Validation Testing
 
 **Evaluation Description:** 
