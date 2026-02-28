@@ -50,7 +50,159 @@ Students must identify bugs in the provided code. Using Guideline 3, they should
 
 You should compare bugs found using the checklist below with the bugs.
 
-**Possible Bug Discovery Checklist:**
+---
+
+#### **UNGUIDED PROMPT (Before Applying Guidelines)**
+
+```
+Write pytest tests for the user_validator.py module. Make sure the tests cover the validation functions and pass.
+```
+
+**Expected Output from Unguided Prompt:**
+- **Tests Generated:** 4-8 basic tests
+- **Bugs Found:** 2-5 bugs (mainly obvious ones like empty strings, simple invalid formats)
+- **Missing Coverage:** 
+  - No None/null input testing
+  - Missing boundary conditions (off-by-one errors)
+  - No special character edge cases for email
+  - No tests for usernames starting with numbers or being all numbers
+  - Missing password special character and uppercase requirements
+  - No age boundary testing (0, negative, extremely high values)
+
+**Example of Typical Unguided Test Output:**
+```python
+def test_validate_email_valid():
+    assert validate_email("user@example.com") == True
+
+def test_validate_email_invalid():
+    assert validate_email("invalid") == False
+
+def test_validate_username_valid():
+    assert validate_username("validuser") == True
+
+def test_validate_password_valid():
+    assert validate_password("Password123") == True
+```
+
+---
+
+#### **GUIDED PROMPT (After Applying Guideline 3)**
+
+```
+Generate pytest unit tests for the user validation module in `user_validator.py`.
+
+The module contains four validation functions: validate_email(), validate_age(), validate_username(), and validate_password().
+
+**Required test categories for EACH function (minimum 2 tests per category):**
+
+1. **Boundary Cases:**
+   - Empty strings
+   - Minimum/maximum length values
+   - Off-by-one conditions (e.g., length 2, 3, 30, 31 for username)
+   - Edge numeric values (0, negative, very large numbers for age)
+
+2. **Null/Missing Inputs:**
+   - None values
+   - Missing parameters where applicable
+
+3. **Invalid Format Cases:**
+   - For email: consecutive dots, consecutive special chars, starting with special char, no @ symbol, no domain
+   - For username: starting with numbers, all numbers, special characters beyond underscore
+   - For password: missing uppercase, missing digits, missing special characters, too short
+
+4. **Exception Paths:**
+   - TypeError for None inputs
+   - Proper True/False returns for valid/invalid inputs
+
+**Framework:** pytest with @pytest.mark.parametrize for efficient testing
+**Constraints:** 
+- Do not modify user_validator.py
+- Each test must have clear assertions
+- Use descriptive test names that indicate what is being tested
+
+Generate comprehensive tests that will expose validation bugs.
+```
+
+**Expected Output from Guided Prompt:**
+- **Tests Generated:** 20-30 comprehensive tests
+- **Bugs Found:** 7-13 bugs 
+- **Coverage Includes:**
+  - TypeError checks for None inputs across all functions
+  - Email edge cases (consecutive dots, special char placement)
+  - Username validation flaws (numeric starts, all-numeric usernames)
+  - Password missing requirements (uppercase, special characters)
+  - Age boundary violations (0, negative, unreasonably high values)
+  - Off-by-one errors in length validation
+
+**Example of Typical Guided Test Output:**
+```python
+import pytest
+from user_validator import validate_email, validate_age, validate_username, validate_password
+
+class TestValidateEmail:
+    @pytest.mark.parametrize("email,expected", [
+        ("user@example.com", True),  # happy path
+        ("user..name@domain.com", False),  # consecutive dots - BUG FOUND
+        (".username@domain.com", False),  # starts with special char - BUG FOUND
+        ("user.@name@domain.com", False),  # consecutive special chars - BUG FOUND
+        ("", False),  # empty string
+        ("user@", False),  # missing domain
+    ])
+    def test_email_formats(self, email, expected):
+        assert validate_email(email) == expected
+    
+    def test_email_none_input(self):
+        # BUG FOUND: Should raise TypeError but doesn't
+        with pytest.raises(TypeError):
+            validate_email(None)
+
+class TestValidateAge:
+    @pytest.mark.parametrize("age,expected", [
+        (25, True),  # happy path
+        (0, False),  # BUG FOUND: boundary not handled
+        (-5, False),  # negative
+        (999, False),  # BUG FOUND: no upper bound
+        (150, False),  # reasonable upper bound
+    ])
+    def test_age_boundaries(self, age, expected):
+        assert validate_age(age) == expected
+
+class TestValidateUsername:
+    def test_username_none_input(self):
+        # BUG FOUND: Should raise TypeError
+        with pytest.raises(TypeError):
+            validate_username(None)
+    
+    @pytest.mark.parametrize("username,expected", [
+        ("validuser", True),  # happy path
+        ("1username", False),  # BUG FOUND: starts with number
+        ("123456", False),  # BUG FOUND: all numbers
+        ("us", False),  # too short - BUG: off-by-one
+        ("a" * 31, False),  # too long - BUG: off-by-one
+    ])
+    def test_username_rules(self, username, expected):
+        assert validate_username(username) == expected
+
+class TestValidatePassword:
+    def test_password_none_input(self):
+        # BUG FOUND: Should raise TypeError
+        with pytest.raises(TypeError):
+            validate_password(None)
+    
+    @pytest.mark.parametrize("password,expected", [
+        ("Password1!", True),  # happy path
+        ("password1!", False),  # BUG FOUND: no uppercase required
+        ("Password", False),  # missing digit
+        ("Password1", False),  # BUG FOUND: no special char check
+        ("Pass1!", False),  # too short - BUG: off-by-one
+    ])
+    def test_password_requirements(self, password, expected):
+        assert validate_password(password) == expected
+```
+
+---
+
+#### **Possible Bug Discovery Checklist:**
 
 | Bug # | Description | Actual Behavior | Expected Behavior |
 |-------|-------------|----------------|------------------|
@@ -86,7 +238,317 @@ Decomposition should reveal logical flaws that black-box testing misses.
 
 You should compare bugs found using the checklist below with the bugs.
 
-**Possible Bug Discovery Checklist:**
+---
+
+#### **UNGUIDED PROMPT (Before Applying Guidelines)**
+
+```
+Write pytest tests for order_processor.py. Test the process_order method to make sure it works correctly.
+```
+
+**Expected Output from Unguided Prompt:**
+- **Tests Generated:** 3-6 basic tests
+- **Bugs Found:** 2-3 bugs (only surface-level issues like missing order_id)
+- **Missing Coverage:**
+  - No systematic decomposition of sub-behaviors
+  - Missing validation for negative quantities/prices
+  - No tests for discount edge cases (negative totals, invalid codes)
+  - Tax calculation timing not verified
+  - Shipping logic not properly tested
+  - Payment processing assumed to succeed
+  - Error handling not comprehensively tested
+
+**Example of Typical Unguided Test Output:**
+```python
+def test_process_order_basic():
+    order = Order(
+        order_id="ORD001",
+        customer_id="CUST001",
+        items=[{"product_id": "PROD1", "quantity": 2, "price": 50.0}],
+        payment_method="credit_card",
+        shipping_address={"street": "123 Main St"}
+    )
+    processor = OrderProcessor()
+    result = processor.process_order(order)
+    assert result["status"] == "completed"
+
+def test_process_order_with_discount():
+    order = Order(
+        order_id="ORD002",
+        customer_id="CUST002",
+        items=[{"product_id": "PROD1", "quantity": 1, "price": 100.0}],
+        payment_method="credit_card",
+        shipping_address={"street": "123 Main St"}
+    )
+    processor = OrderProcessor()
+    result = processor.process_order(order, discount_code="SAVE10")
+    assert "discount" in result
+```
+
+---
+
+#### **GUIDED PROMPT (After Applying Guideline 4)**
+
+```
+The file `order_processor.py` contains a complex `process_order()` method that handles multiple responsibilities.
+
+**Step 1: Identify Logical Sub-Behaviors**
+Analyze the `process_order()` method and list its distinct logical sub-behaviors (validation, calculations, discounts, taxes, shipping, payment, etc.). Describe what each sub-behavior should do. Do not write code yet.
+
+**Step 2: Generate Tests Per Sub-Behavior**
+For each sub-behavior identified in Step 1, generate a separate pytest test group. For each sub-behavior, include:
+
+1. **Happy Path Test:** Normal, expected inputs
+2. **Boundary Cases:** 
+   - Zero quantities/prices
+   - Minimum/maximum order values
+   - Threshold values for shipping (e.g., $99.99, $100, $100.01)
+   - Discount boundaries
+3. **Negative/Invalid Cases:**
+   - Negative quantities or prices
+   - Missing required fields (order_id, customer_id, items, payment_method)
+   - Invalid discount codes
+   - Empty items list
+4. **Edge Cases:**
+   - Discount making total negative
+   - Tax calculation timing (before vs after discount)
+   - Shipping cost logic with discounts
+   - Payment failures
+
+**Framework:** pytest with @pytest.mark.parametrize
+**Constraints:**
+- Do not modify order_processor.py
+- Test each sub-behavior in isolation where possible
+- Use descriptive test class and method names
+- Clear assertions for expected vs actual behavior
+
+Generate comprehensive tests that expose hidden bugs through systematic behavior decomposition.
+```
+
+**Expected Output from Guided Prompt:**
+- **Tests Generated:** 25-40 comprehensive tests organized by sub-behavior
+- **Bugs Found:** 7-10 bugs (through systematic testing of each responsibility)
+- **Coverage Includes:**
+  - Complete validation testing (all required fields, negative values)
+  - Subtotal calculation verification
+  - Discount logic edge cases (negative totals, invalid codes)
+  - Tax timing verification (pre vs post-discount)
+  - Shipping threshold testing with boundary values
+  - Payment processing validation
+  - Error handling across all sub-behaviors
+
+**Example of Typical Guided Test Output:**
+```python
+import pytest
+from order_processor import Order, OrderProcessor, OrderStatus, PaymentStatus
+
+class TestOrderValidation:
+    """Tests for order data validation sub-behavior"""
+    
+    def test_missing_order_id(self):
+        # BUG FOUND: Incomplete validation
+        order = Order(
+            order_id="",
+            customer_id="CUST001",
+            items=[{"product_id": "P1", "quantity": 1, "price": 50.0}],
+            payment_method="card",
+            shipping_address={"street": "123 Main"}
+        )
+        processor = OrderProcessor()
+        with pytest.raises(ValueError, match="Order ID required"):
+            processor.process_order(order)
+    
+    # BUG FOUND: Missing validation for other required fields
+    def test_missing_customer_id(self):
+        order = Order(
+            order_id="ORD001",
+            customer_id="",
+            items=[{"product_id": "P1", "quantity": 1, "price": 50.0}],
+            payment_method="card",
+            shipping_address={"street": "123 Main"}
+        )
+        processor = OrderProcessor()
+        with pytest.raises(ValueError):
+            processor.process_order(order)
+    
+    @pytest.mark.parametrize("quantity,price", [
+        (-1, 50.0),  # BUG FOUND: negative quantity not validated
+        (1, -50.0),  # BUG FOUND: negative price not validated
+        (0, 50.0),   # edge: zero quantity
+    ])
+    def test_invalid_item_values(self, quantity, price):
+        order = Order(
+            order_id="ORD001",
+            customer_id="CUST001",
+            items=[{"product_id": "P1", "quantity": quantity, "price": price}],
+            payment_method="card",
+            shipping_address={"street": "123 Main"}
+        )
+        processor = OrderProcessor()
+        with pytest.raises(ValueError):
+            processor.process_order(order)
+
+
+class TestDiscountApplication:
+    """Tests for discount logic sub-behavior"""
+    
+    @pytest.mark.parametrize("discount_code,subtotal,expected_discount", [
+        ("SAVE10", 100.0, 10.0),
+        ("SAVE20", 100.0, 20.0),
+        ("FREEBIE", 100.0, 100.0),
+    ])
+    def test_valid_discount_codes(self, discount_code, subtotal, expected_discount):
+        order = Order(
+            order_id="ORD001",
+            customer_id="CUST001",
+            items=[{"product_id": "P1", "quantity": 1, "price": subtotal}],
+            payment_method="card",
+            shipping_address={"street": "123 Main"}
+        )
+        processor = OrderProcessor()
+        result = processor.process_order(order, discount_code=discount_code)
+        assert result["discount_amount"] == expected_discount
+    
+    def test_freebie_makes_total_negative(self):
+        # BUG FOUND: FREEBIE discount can make total negative
+        order = Order(
+            order_id="ORD001",
+            customer_id="CUST001",
+            items=[{"product_id": "P1", "quantity": 1, "price": 50.0}],
+            payment_method="card",
+            shipping_address={"street": "123 Main"}
+        )
+        processor = OrderProcessor()
+        result = processor.process_order(order, discount_code="FREEBIE")
+        # Total should never be negative
+        assert result["final_total"] >= 0
+    
+    def test_invalid_discount_code(self):
+        # BUG FOUND: Invalid discount codes not handled
+        order = Order(
+            order_id="ORD001",
+            customer_id="CUST001",
+            items=[{"product_id": "P1", "quantity": 1, "price": 100.0}],
+            payment_method="card",
+            shipping_address={"street": "123 Main"}
+        )
+        processor = OrderProcessor()
+        with pytest.raises(ValueError, match="Invalid discount code"):
+            processor.process_order(order, discount_code="INVALID")
+
+
+class TestTaxCalculation:
+    """Tests for tax calculation sub-behavior"""
+    
+    def test_tax_calculated_after_discount(self):
+        # BUG FOUND: Tax calculated on pre-discount amount
+        order = Order(
+            order_id="ORD001",
+            customer_id="CUST001",
+            items=[{"product_id": "P1", "quantity": 1, "price": 100.0}],
+            payment_method="card",
+            shipping_address={"street": "123 Main"}
+        )
+        processor = OrderProcessor()
+        result = processor.process_order(order, discount_code="SAVE20")
+        
+        # Expected: tax on $80 (after 20% discount) = $6.40
+        # Actual: tax on $100 (before discount) = $8.00
+        expected_tax = 80.0 * 0.08
+        assert result["tax_amount"] == expected_tax
+
+
+class TestShippingLogic:
+    """Tests for shipping cost determination sub-behavior"""
+    
+    @pytest.mark.parametrize("subtotal,discount_code,expected_shipping", [
+        (150.0, None, 0.0),         # > $100 after discount
+        (120.0, "SAVE10", 0.0),     # $108 after discount (> $100)
+        (110.0, "SAVE20", 9.99),    # $88 after discount (< $100)
+        (99.99, None, 9.99),        # boundary: just below $100
+        (100.01, None, 0.0),        # boundary: just above $100
+    ])
+    def test_shipping_thresholds(self, subtotal, discount_code, expected_shipping):
+        # BUG FOUND: Free shipping logic broken - uses pre-discount subtotal
+        order = Order(
+            order_id="ORD001",
+            customer_id="CUST001",
+            items=[{"product_id": "P1", "quantity": 1, "price": subtotal}],
+            payment_method="card",
+            shipping_address={"street": "123 Main"}
+        )
+        processor = OrderProcessor()
+        result = processor.process_order(order, discount_code=discount_code)
+        assert result["shipping_cost"] == expected_shipping
+
+
+class TestPaymentProcessing:
+    """Tests for payment processing sub-behavior"""
+    
+    def test_payment_failure_handling(self):
+        # BUG FOUND: Payment processing assumes success
+        order = Order(
+            order_id="ORD001",
+            customer_id="CUST001",
+            items=[{"product_id": "P1", "quantity": 1, "price": 50.0}],
+            payment_method="invalid_method",
+            shipping_address={"street": "123 Main"}
+        )
+        processor = OrderProcessor()
+        with pytest.raises(Exception, match="Payment.*failed"):
+            processor.process_order(order)
+    
+    def test_negative_payment_amount(self):
+        # BUG FOUND: Payment amount not validated
+        order = Order(
+            order_id="ORD001",
+            customer_id="CUST001",
+            items=[{"product_id": "P1", "quantity": 1, "price": 50.0}],
+            payment_method="card",
+            shipping_address={"street": "123 Main"}
+        )
+        processor = OrderProcessor()
+        result = processor.process_order(order, discount_code="FREEBIE")
+        # Payment amount should never be negative
+        assert result.get("payment_amount", 0) >= 0
+
+
+class TestErrorHandling:
+    """Tests for error handling sub-behavior"""
+    
+    def test_generic_error_loses_details(self):
+        # BUG FOUND: Generic error handling loses important failure details
+        order = Order(
+            order_id="ORD001",
+            customer_id="CUST001",
+            items=[{"product_id": "P1", "quantity": -5, "price": 50.0}],
+            payment_method="card",
+            shipping_address={"street": "123 Main"}
+        )
+        processor = OrderProcessor()
+        try:
+            processor.process_order(order)
+        except Exception as e:
+            # Error message should be specific, not generic
+            assert "quantity" in str(e).lower() or "negative" in str(e).lower()
+```
+
+---
+
+#### **Decomposition Quality Assessment:**
+Students should identify these logical sub-behaviors:
+1. Order data validation
+2. Subtotal calculation
+3. Discount application
+4. Tax calculation  
+5. Shipping cost determination
+6. Payment processing
+7. Order state updates
+8. Result generation
+
+---
+
+#### **Possible Bug Discovery Checklist:**
 | Bug # | Description | Actual Behavior | Expected Behavior |
 |-------|-------------|----------------|------------------|
 | 1 | Incomplete order validation | Missing checks for customer_id, items, payment_method | Validates all required fields |
@@ -99,17 +561,6 @@ You should compare bugs found using the checklist below with the bugs.
 | 8 | Generic error handling loses important failure details | Returns generic error | Returns specific error details |
 | 9 | Payment amount not validated | Accepts negative payment amounts | Rejects negative payment amounts |
 | 10 | Unknown payment methods not properly rejected | Accepts unknown methods | Rejects unknown payment methods |
-
-**Decomposition Quality Assessment:**
-Students should identify these logical sub-behaviors:
-1. Order data validation
-2. Subtotal calculation
-3. Discount application
-4. Tax calculation  
-5. Shipping cost determination
-6. Payment processing
-7. Order state updates
-8. Result generation
 
 **Expected Results:**
 - **Without Guideline 4:** Should find 2-3 bugs (surface-level issues)
@@ -126,7 +577,231 @@ Students should discover ** at least 10 bugs** across multiple parsing functions
 
 You should compare bugs found using the checklist below with the bugs.
 
-**Possible Bug Discovery Checklist:**
+---
+
+#### **UNGUIDED PROMPT (Before Applying Guidelines)**
+
+```
+Write pytest tests for data_parser.py. Test all the parsing functions to ensure they work correctly.
+```
+
+**Expected Output from Unguided Prompt:**
+- **Tests Generated:** 6-10 basic tests
+- **Bugs Found:** 3-6 bugs (mainly obvious input errors and crashes)
+- **Missing Coverage:**
+  - No None input testing across functions
+  - Missing empty string/empty file testing
+  - No tests for malformed data (invalid JSON, CSV with missing fields)
+  - Missing regex pattern edge cases (negative numbers, scientific notation)
+  - No whitespace edge cases testing
+  - Missing type validation testing
+  - No comprehensive error message verification
+
+**Example of Typical Unguided Test Output:**
+```python
+def test_parse_csv_basic():
+    csv_data = "name,age\nJohn,30\nJane,25"
+    result = parse_csv_data(csv_data)
+    assert len(result) == 2
+
+def test_parse_json_basic():
+    json_data = '{"name": "John", "age": 30}'
+    result = parse_json_config(json_data)
+    assert result["name"] == "John"
+
+def test_extract_numbers_basic():
+    text = "I have 5 apples and 3.5 oranges"
+    result = extract_numbers(text)
+    assert 5.0 in result
+
+def test_normalize_whitespace_basic():
+    text = "Hello   World"
+    result = normalize_whitespace(text)
+    assert result == "Hello World"
+```
+
+---
+
+#### **GUIDED PROMPT (After Applying Guidelines 3 & 4)**
+
+```
+The file `data_parser.py` contains multiple parsing functions with different responsibilities.
+
+**Step 1: Identify Functions and Their Sub-Behaviors**
+List each parsing function and describe its intended behavior:
+- parse_csv_data(): CSV parsing with delimiter support
+- parse_json_config(): JSON parsing with required field validation
+- extract_numbers(): Number extraction from text (integers, floats, scientific notation)
+- normalize_whitespace(): Whitespace normalization with line break preservation option
+
+For each function, identify edge cases and error conditions. Do not write code yet.
+
+**Step 2: Generate Comprehensive Tests**
+For EACH parsing function, generate separate test classes. For each function, include:
+
+1. **Boundary Cases (minimum 2 tests):**
+   - Empty string input
+   - Empty files/data structures (header-only CSV, empty JSON object)
+   - Minimum/maximum values
+   - Single element inputs
+
+2. **Null/Missing Input Cases (minimum 2 tests):**
+   - None inputs
+   - Missing required fields (for JSON)
+   - Rows with missing fields (for CSV)
+
+3. **Invalid Format Cases (minimum 3 tests):**
+   - Malformed CSV (inconsistent columns, missing delimiters)
+   - Invalid JSON (syntax errors, wrong types)
+   - Invalid number formats (standalone dots, special characters)
+   - Invalid whitespace patterns
+
+4. **Exception Path Tests (minimum 2 tests):**
+   - ParseError conditions and messages
+   - TypeError for None inputs
+   - Proper exception types for each error condition
+
+5. **Special Edge Cases:**
+   - CSV: header-only files, rows with different field counts
+   - JSON: non-dictionary parsed results, deeply nested structures
+   - Numbers: negative numbers, scientific notation (1e5), decimal edge cases (0.0, .5, 5.)
+   - Whitespace: line break preservation logic, mixed whitespace types (tabs, spaces, newlines)
+
+**Framework:** pytest with @pytest.mark.parametrize for efficient testing
+**Constraints:**
+- Do not modify data_parser.py
+- Test each function's edge cases comprehensively
+- Verify error messages are informative, not generic
+- Use descriptive test names indicating the specific edge case
+
+Generate systematic tests that will expose parsing bugs through comprehensive edge case coverage.
+```
+
+**Expected Output from Guided Prompt:**
+- **Tests Generated:** 40-60 comprehensive tests organized by function
+- **Bugs Found:** 10-24 bugs (comprehensive coverage across all parsing functions)
+- **Coverage Includes:**
+  - TypeError checks for None inputs across all functions
+  - Empty/minimal input handling for all functions
+  - CSV edge cases (empty files, missing fields, header-only)
+  - JSON validation (non-dict results, missing required fields, decode errors)
+  - Number extraction edge cases (negatives, scientific notation, standalone dots)
+  - Whitespace handling edge cases (line break preservation, empty strings)
+  - Generic error message issues
+  - Type validation failures
+- **Test Quality:** Highly systematic with parametrized tests covering all edge cases per function
+
+**Example of Typical Guided Test Output:**
+```python
+import pytest
+from data_parser import parse_csv_data, parse_json_config, extract_numbers, normalize_whitespace, ParseError
+
+class TestParseCSV:
+    """Comprehensive tests for CSV parsing sub-behavior"""
+    
+    def test_csv_none_input(self):
+        # BUG FOUND: Crashes on None input
+        with pytest.raises(TypeError):
+            parse_csv_data(None)
+    
+    @pytest.mark.parametrize("csv_input", [
+        "",  # BUG FOUND: Doesn't handle empty string
+        "header\n",  # BUG FOUND: Header-only file
+        "name,age\n",  # Header but no data rows
+    ])
+    def test_csv_empty_edge_cases(self, csv_input):
+        result = parse_csv_data(csv_input)
+        assert isinstance(result, list)
+    
+    def test_csv_missing_fields(self):
+        # BUG FOUND: Doesn't handle rows with missing fields
+        csv_data = "name,age,city\nJohn,30\nJane,25,NYC"
+        result = parse_csv_data(csv_data)
+        assert len(result) == 2
+    
+    def test_csv_generic_error_message(self):
+        # BUG FOUND: Generic exception handling hides specific errors
+        csv_data = "invalid\x00data"
+        try:
+            parse_csv_data(csv_data)
+        except ParseError as e:
+            assert "CSV parsing failed" in str(e)
+
+
+class TestParseJSON:
+    """Comprehensive tests for JSON parsing and validation sub-behavior"""
+    
+    def test_json_none_input(self):
+        # BUG FOUND: Crashes on None input
+        with pytest.raises(TypeError):
+            parse_json_config(None)
+    
+    def test_json_non_dict_result(self):
+        # BUG FOUND: Doesn't validate parsed JSON is a dictionary
+        json_string = '[1, 2, 3]'
+        with pytest.raises((ParseError, TypeError)):
+            parse_json_config(json_string)
+    
+    def test_json_missing_required_fields(self):
+        # BUG FOUND: Required field validation continues instead of failing
+        json_string = '{"name": "John"}'
+        required_fields = ["name", "age", "email"]
+        with pytest.raises(ParseError):
+            result = parse_json_config(json_string, required_fields)
+    
+    @pytest.mark.parametrize("invalid_json", [
+        '{invalid}',
+        '{"key": }',
+        '{"key": undefined}',
+    ])
+    def test_json_decode_errors(self, invalid_json):
+        # BUG FOUND: Unhelpful error messages
+        with pytest.raises(ParseError) as exc_info:
+            parse_json_config(invalid_json)
+        assert "Invalid JSON" in str(exc_info.value)
+
+
+class TestExtractNumbers:
+    """Comprehensive tests for number extraction sub-behavior"""
+    
+    def test_extract_numbers_none_input(self):
+        # BUG FOUND: Crashes on None input
+        with pytest.raises(TypeError):
+            extract_numbers(None)
+    
+    @pytest.mark.parametrize("text,expected", [
+        ("I have -5 apples", [-5.0]),  # BUG FOUND: Doesn't capture negatives
+        ("1e5 items", [100000.0]),  # BUG FOUND: Doesn't handle scientific notation
+        ("Just a dot .", []),  # BUG FOUND: Fails on standalone dot
+        ("Price: $3.50", [3.50]),
+    ])
+    def test_extract_numbers_edge_cases(self, text, expected):
+        result = extract_numbers(text)
+        assert result == expected
+
+
+class TestNormalizeWhitespace:
+    """Comprehensive tests for whitespace normalization sub-behavior"""
+    
+    def test_normalize_whitespace_none_input(self):
+        # BUG FOUND: Crashes on None input
+        with pytest.raises(TypeError):
+            normalize_whitespace(None)
+    
+    @pytest.mark.parametrize("text,preserve_breaks,expected", [
+        ("Hello\nWorld", True, "Hello\nWorld"),
+        ("Hello\nWorld", False, "Hello World"),
+        ("Hello  \t  World", "Hello World"),  # Mixed whitespace
+    ])
+    def test_normalize_whitespace_edge_cases(self, text, preserve_breaks, expected):
+        # BUG FOUND: Line break preservation logic may be incorrect
+        result = normalize_whitespace(text, preserve_line_breaks=preserve_breaks)
+        assert result == expected
+```
+
+---
+
+#### **Possible Bug Discovery Checklist:**
 
 | Bug # | Description | Actual Behavior | Expected Behavior |
 |-------|-------------|----------------|------------------|
@@ -161,7 +836,6 @@ You should compare bugs found using the checklist below with the bugs.
 
 **Advice**
 - Ask an LLM to help you check how many bugs the generated tests uncover, based on this table and the tests generated from your prompt.
-
 ___
 
 ## Problem C
