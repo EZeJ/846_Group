@@ -126,23 +126,7 @@ Write pytest tests for the user_validator.py module. Make sure the tests cover t
   - No tests for usernames starting with numbers or being all numbers
   - Missing password special character and uppercase requirements
   - No age boundary testing (0, negative, extremely high values)
-
-**Example of Typical Unguided Test Output:**
-
-```python
-def test_validate_email_valid():
-    assert validate_email("user@example.com") == True
-
-def test_validate_email_invalid():
-    assert validate_email("invalid") == False
-
-def test_validate_username_valid():
-    assert validate_username("validuser") == True
-
-def test_validate_password_valid():
-    assert validate_password("Password123") == True
-```
-
+  
 ---
 
 #### **GUIDED PROMPT (After Applying Guideline 3)**
@@ -257,34 +241,6 @@ Write pytest tests for order_processor.py. Test the process_order method to make
   - Shipping logic not properly tested
   - Payment processing assumed to succeed
   - Error handling not comprehensively tested
-
-**Example of Typical Unguided Test Output:**
-
-```python
-def test_process_order_basic():
-    order = Order(
-        order_id="ORD001",
-        customer_id="CUST001",
-        items=[{"product_id": "PROD1", "quantity": 2, "price": 50.0}],
-        payment_method="credit_card",
-        shipping_address={"street": "123 Main St"}
-    )
-    processor = OrderProcessor()
-    result = processor.process_order(order)
-    assert result["status"] == "completed"
-
-def test_process_order_with_discount():
-    order = Order(
-        order_id="ORD002",
-        customer_id="CUST002",
-        items=[{"product_id": "PROD1", "quantity": 1, "price": 100.0}],
-        payment_method="credit_card",
-        shipping_address={"street": "123 Main St"}
-    )
-    processor = OrderProcessor()
-    result = processor.process_order(order, discount_code="SAVE10")
-    assert "discount" in result
-```
 
 ---
 
