@@ -19,12 +19,11 @@
 |   B_2 | 4      |
 |   B_3 |  3 , 4 |
 |   С |  2, 4 (combined version in `notes.md`) |  
-| D | 3, 6, 7 |
-| D_1 | 6, 7 |
-| D_2 | 3, 6, 7 |
-| D_3 | 3, 6, 7 |
-| D_4 | 3, 7 |
-
+| D | 2, 3, 6 |
+| D_1 | 2, 6 |
+| D_2 | 2, 3, 6 |
+| D_3 | 2, 3, 6 |
+| D_4 | 2, 3|
 
 ## 1. Guidelines for Testing
 
@@ -164,16 +163,6 @@ The module contains four validation functions: validate_email(), validate_age(),
 Generate comprehensive tests that will expose validation bugs.
 ```
 
-**Example with Independent Verification:**
-```
-For `parse_record`, include:
-- 2 boundary tests with exact output verification,
-- 2 malformed-input tests with `pytest.raises`,
-- 1 invariant test that checks a property holds for all valid inputs.
-
-After generation, run the independent grader and report any missed categories.
-```
-
 **Bad Example:**
 ```
 “Write tests for `parseInvoice`. Make sure it covers the main cases and passes.”
@@ -247,36 +236,6 @@ Do not modify implementation files. Return one runnable test file only.
 **Bad Example:**
 ```text
 Write tests for this file. Make sure they pass.
-```
-
----
-
-### Guideline 7: Use a Generate–Validate–Repair Loop Instead of One-Shot Generation
-**Description:**  
-Treat generated tests as drafts:
-1. generate test code,
-2. run syntax/import gate (`py_compile`, `pytest --collect-only`),
-3. run tests and capture short failures,
-4. ask for targeted fixes to failing parts only,
-5. re-run with bounded iterations.
-
-**Reasoning:**  
-Empirical work and practitioner reports show one-shot outputs often contain execution and assertion issues; iterative repair materially improves usefulness [3], [4], [5], [7], [8].
-
-**Good Example:**
-```text
-These tests fail with:
-[PASTE SHORT TRACEBACK]
-
-Patch only failing tests/imports.
-Do not rewrite passing tests.
-Do not edit implementation code.
-Return code only.
-```
-
-**Bad Example:**
-```text
-Fix it.
 ```
 
 ---
