@@ -64,72 +64,55 @@ use `eval_test_coverage.py` to measure how well LLM-generated tests cover the fu
 
 Additional details in `problem_C/README.md`
 
+### Problem D
 
-## Problem D: 
-
-### 1. Example Problems
-
-**Setup (pytest):** Before starting, install `pytest` with `python3 -m pip install -r problem_D/requirements.txt` (or `python3 -m pip install pytest`).
+**Setup (pytest):** Before starting, install `pytest` with `python3 -m pip install -r ProblemD/requirements.txt` (or `python3 -m pip install pytest`).
 
 #### Problem D_1: Understand the Mini Autograd API and Generate Baseline Tests
 
 **Task Description:**  
-This problem uses a **pure-Python mini autograd engine** (`problem_D/student/src/mini_autograd.py`) that is inspired by PyTorch autograd, but does not require installing PyTorch.  
-In this context, an **autograd function** means a custom operation with an explicit forward computation and backward (gradient) rule. In `problem_D`, custom operations are implemented using a `Function.apply(...)` API similar to `torch.autograd.Function`.
+This problem uses a **pure-Python mini autograd engine** (`ProblemD/student/src/mini_autograd.py`) that is inspired by PyTorch autograd, but does not require installing PyTorch.  
+In this context, an **autograd function** means a custom operation with an explicit forward computation and backward (gradient) rule. In `ProblemD`, custom operations are implemented using a `Function.apply(...)` API similar to `torch.autograd.Function`.
 
-Use an LLM to generate a first pytest test file that checks baseline behavior for the mini engine:
-- forward correctness for simple scalar expressions,
-- backward correctness for basic operations (`+`, `*`),
-- at least one custom function forward/backward case.
-
-Review and refine the generated tests so they are clean and runnable. Do not change the implementation code yet.
+Use an GPT-5-mini to generate a first pytest test files that checks baseline behavior for the mini engine:
+Review and refine the generated tests so they are clean and runnable. 
+Run your tests for detecting bugs, but do not change the implementation code yet.
 
 **Starter Code:**  
-`problem_D/student/src/mini_autograd.py`  
-`problem_D/student/src/demo_custom_functions.py`  
-`problem_D/student/tests/test_examples_smoke.py` (style example only)
+`ProblemD/student/src/mini_autograd.py`  
+`ProblemD/student/src/demo_custom_functions.py`  
+`ProblemD/student/tests/test_examples_smoke.py` (style example only)
 
 ---
 
 #### Problem D_2: Design Edge-Case Tests for Autograd Graph Semantics
 
 **Task Description:**  
-Use your LLM workflow (prompt + critique + revision) to extend the pytest suite and test **graph semantics**, not just arithmetic outputs. Add tests for behavior such as:
-- gradient accumulation through shared subgraphs,
-- `requires_grad` propagation,
-- `detach()` behavior,
-- `zero_grad()` behavior,
-- boundary cases for custom operations (for example, a clamp-like function).
+Use your LLM to extend the pytest suite and test **graph semantics**, not just arithmetic outputs. Add tests for behavior such as: gradient accumulation through shared subgraphs, etc.
+
 
 Your tests should be small and deterministic. Avoid hidden dependencies and avoid rewriting the starter code in the test file.
 
 **Starter Code:**  
-`problem_D/student/src/mini_autograd.py`  
-`problem_D/student/src/demo_custom_functions.py`
+`ProblemD/student/src/mini_autograd.py`  
+`ProblemD/student/src/demo_custom_functions.py`
 
 ---
 
 #### Problem D_3: Use an LLM to Generate Tests for the Standardized `axpy` Function
 
 **Task Description:**  
-All students will use an LLM to generate pytest tests for the same function: `axpy(a, x, y)` in `problem_D/student/src/demo_custom_functions.py`.  
+All students will use an LLM to generate pytest tests for the same function: `axpy(a, x, y)` in `ProblemD/student/src/demo_custom_functions.py`.  
 Your goal is to produce a clean, runnable test file for `axpy` and improve it through prompt refinement.
-
-Use an LLM to generate tests, run them, and refine your prompts at least once. Your final test file must include checks for:
-- forward correctness for `axpy(a, x, y) = a * x + y`,
-- backward gradients for all three inputs (`a`, `x`, `y`),
-- gradient order correctness (the returned gradients must match the input order),
-- at least one edge case (for example: zero values, negative values, or reused values).
 
 You must document and submit:
 1. the model used,  
 2. the prompt(s) used,  
 3. the final generated/refined test code, and  
-4. a short note describing what your first generated tests missed and what changed after prompt refinement.
 
 **Starter Code:**  
-`problem_D/student/src/demo_custom_functions.py`  
-`problem_D/student/src/mini_autograd.py`
+`ProblemD/student/src/demo_custom_functions.py`  
+`ProblemD/student/src/mini_autograd.py`
 
 ---
 
@@ -137,34 +120,23 @@ You must document and submit:
 
 **Task Description:**  
 Use the tests you generated/refined in Problems D_1–D_3 to identify and fix bugs in the starter implementation (you may use an LLM to propose patches, but you must verify them with tests):
-- `problem_D/student/src/mini_autograd.py`
-- `problem_D/student/src/demo_custom_functions.py`
+- `ProblemD/student/src/mini_autograd.py`
+- `ProblemD/student/src/demo_custom_functions.py`
 
 Requirements:
 1. Run your own tests first and use failures to guide debugging.
 2. Fix implementation bugs without deleting features.
 3. Keep your tests (and any LLM-generated tests) as evidence of how you found the bugs.
-4. After the official `problem_D` tests are provided/run, write a short comparison between your test suite and the official tests:
-   - identify at least 3 bug patterns or behaviors the official tests caught that your tests missed (if any),
-   - explain what your tests caught early,
-   - explain where LLM-generated tests missed coverage and how you would improve the prompts.
+4. Make sure your pass all your tests.
 
-**Important:** After you finish `problem_D`, we will provide/run **official tests** to verify whether your tests were strong enough to expose the bugs and whether your fixes resolve all intended defects.
 
 **Starter Code:**  
-`problem_D/student/src/mini_autograd.py`  
-`problem_D/student/src/demo_custom_functions.py`  
-Run helper scripts (if `pytest` is installed):  
-`problem_D/scripts/run_student_tests.sh`  
-`problem_D/scripts/run_official_tests_student.sh`
-
+`ProblemD/student/src/mini_autograd.py`  
+`ProblemD/student/src/demo_custom_functions.py`  
 ---
 
 
-## 2. References
 
-[1] `submits/example_formats.md` (format reference)  
-[2] `problem_D/README.md` (exercise packaging and run instructions)  
-[3] `problem_D/instructor/tests/test_official_autograd_contract.py` (official test suite used after submission)
+
 
 ---

@@ -859,128 +859,380 @@ def test_test_client_context_manager_allows_request_local_access():
 ### Problem D_1: Baseline Test Generation for Mini Autograd
 
 **Evaluation Description:**  
-Students generate an initial pytest suite for a pure-Python mini autograd engine and verify basic forward/backward behavior.
+The output should be a runnable pytest file that checks basic forward/backward behavior and at least one custom autograd function. Good tests should be deterministic and use explicit assertions.
 
-**Possible Behavior Discovery Checklist:**
-
-| Check # | Description                     | Actual Baseline Behavior       | Expected Behavior                                |
-| ------- | ------------------------------- | ------------------------------ | ------------------------------------------------ |
-| 1       | Runnable imports and collection | Import/collection error        | Tests collect and run directly                   |
-| 2       | Forward scalar assertions       | Missing due collection failure | Deterministic forward-value checks               |
-| 3       | Backward checks for `+` and `*` | Missing due collection failure | Correct gradients asserted for both ops          |
-| 4       | Custom autograd function checks | Missing due collection failure | At least one custom op tested (forward/backward) |
-| 5       | Output contract                 | Mixed prose/code in early runs | Single runnable test file, code-only             |
+**Marking Criteria (checklist):**
+- Test file collects and runs under `pytest` from repo root.
+- Covers forward correctness for at least one composed scalar expression.
+- Covers backward correctness for both `+` and `*`.
+- Includes ≥1 custom function forward/backward test (e.g., `axpy`, `square`, or `clamp01`).
+- Uses small deterministic scalar values (no randomness).
+- **Reference check:** passes on the new code base (`ProblemD/instructor/solution`) (tests are not asserting the wrong contract).
 
 **Expected Results:**
 
 - **Without structured prompts:** likely collection failures or weak smoke tests only.
 - **With structured prompts:** runnable tests with concrete forward/backward assertions.
 
-**Measured Results:**
+#### UNGUIDED PROMPT (Baseline)
 
-- Baseline prompt: collection/import failure.
-- Guided prompt (phase 2): runnable suite, `1 passed / 4 failed`.
+```text
+### Problem D_1: Understand the Mini Autograd API and Generate Baseline Tests
+
+**Task Description:**  
+This problem uses a **pure-Python mini autograd engine** (`ProblemD/student/src/mini_autograd.py`) that is inspired by PyTorch autograd, but does not require installing PyTorch.  
+In this context, an **autograd function** means a custom operation with an explicit forward computation and backward (gradient) rule. In `ProblemD`, custom operations are implemented using a `Function.apply(...)` API similar to `torch.autograd.Function`.
+
+Use an GPT-5-mini to generate a first pytest test files that checks baseline behavior for the mini engine:
+Review and refine the generated tests so they are clean and runnable. 
+Run your tests for detecting bugs, but do not change the implementation code yet.
+
+**Starter Code:**  
+`ProblemD/student/src/mini_autograd.py`  
+`ProblemD/student/src/demo_custom_functions.py`  
+`ProblemD/student/tests/test_examples_smoke.py` (style example only)
+
+---
+```
+
+**Expected Output (Unguided):**
+- Likely failure mode: model tries to create files/run shell commands; output may include non-code or incorrect assumptions.
+- Measured (Copilot CLI `gpt-5-mini`, latest run in `submits_2/problemD_copilot_cli/results/scorecard.md`):
+  - original code base: **7 passed / 5 failed**
+  - new code base: **11 passed / 1 failed** (baseline included an incorrect contract assertion about initial `grad`)
+
+#### GUIDED PROMPT (Upgraded)
+
+```text
+You are generating pytest tests for a class exercise (Problem D_1).
+
+Output contract (must follow exactly):
+- return one runnable Python pytest file only
+- no prose, no markdown fences, no headings
+- do not run commands and do not create files
+
+Execution environment contract:
+- tests run from repository root
+- use these imports (exactly):
+  from ProblemD.student.src.mini_autograd import Tensor
+  from ProblemD.student.src import demo_custom_functions as custom
+
+Task:
+- write baseline unit tests for the mini autograd engine:
+  - forward correctness for simple scalar expressions
+  - backward correctness for basic operations (+, *)
+  - at least one custom function forward/backward case (use custom.axpy or custom.clamp01 or custom.square)
+
+Fault model (each must be killed by ≥1 test, tag each test with `# targets: FM*`):
+- FM1: `Tensor.backward(grad=...)` ignores the explicit upstream grad argument
+- FM2: `__add__` sets `requires_grad` with AND instead of OR
+- FM3: `__mul__` backward misses the upstream scaling factor for one operand
+- FM4: custom function backward returns gradients in the wrong order
+
+Constraints:
+- deterministic small scalar values only
+- explicit assertions (no smoke tests)
+- use pytest only
+- do not modify implementation files
+```
+
+**Expected Output (Guided):**
+- Output is a single runnable pytest file (code-only) with pinned imports and explicit assertions.
+- Measured (Copilot CLI `gpt-5-mini`):
+  - original code base: **1 passed / 5 failed** (useful failing signals on buggy behaviors)
+  - new code base: **6 passed / 0 failed**
 
 ---
 
-### Problem D_2: Graph Semantics and Edge-Case Testing
+
+### Problem D_2: Design Edge-Case Tests for Autograd Graph Semantics
 
 **Evaluation Description:**  
-Students extend tests to graph semantics instead of only arithmetic outputs.
+The output should extend testing beyond arithmetic outputs to graph semantics: accumulation, `requires_grad` propagation, `detach()`, `zero_grad()`, upstream gradient scaling, and boundary behavior for a clamp-like op.
 
-**Possible Behavior Discovery Checklist:**
+**Marking Criteria (checklist):**
+- Test file collects and runs under `pytest` from repo root.
+- Includes at least one shared-subgraph accumulation test (e.g., reuse an intermediate).
+- Includes a `detach()` behavior test with a failure assertion (`pytest.raises(...)`).
+- Includes a `zero_grad()` numeric reset test and verifies re-backward works afterward.
+- Includes an explicit upstream gradient scaling test (e.g., `out.backward(2.0)`).
+- Includes at least one boundary derivative test for `clamp01`.
+- **Reference check:** passes on the new code base (`ProblemD/instructor/solution`) (tests reflect the intended contract).
 
-| Check # | Description                           | Actual Baseline Behavior       | Expected Behavior                             |
-| ------- | ------------------------------------- | ------------------------------ | --------------------------------------------- |
-| 1       | Shared-subgraph gradient accumulation | Missing due collection failure | Explicit accumulation assertions              |
-| 2       | `requires_grad` propagation           | Missing due collection failure | Propagation behavior verified                 |
-| 3       | `detach()` contract                   | Missing due collection failure | `requires_grad=False` + backward failure path |
-| 4       | `zero_grad()` semantics               | Missing due collection failure | Gradient reset behavior asserted              |
-| 5       | Boundary case in custom function      | Missing due collection failure | At least one boundary-case gradient test      |
-| 6       | Negative/exception assertion          | Missing due collection failure | At least one meaningful `pytest.raises` check |
+#### UNGUIDED PROMPT (Baseline)
 
-**Expected Results:**
+```text
+### Problem D_2: Design Edge-Case Tests for Autograd Graph Semantics
 
-- **Without structured prompts:** non-runnable output or shallow happy-path tests.
-- **With structured prompts:** runnable tests spanning multiple semantic categories.
+**Task Description:**  
+Use your LLM to extend the pytest suite and test **graph semantics**, not just arithmetic outputs. Add tests for behavior such as: gradient accumulation through shared subgraphs, etc.
 
-**Measured Results:**
 
-- Baseline prompt: collection/import failure.
-- Guided prompt (phase 2): runnable suite, `2 passed / 4 failed`.
+Your tests should be small and deterministic. Avoid hidden dependencies and avoid rewriting the starter code in the test file.
+
+**Starter Code:**  
+`ProblemD/student/src/mini_autograd.py`  
+`ProblemD/student/src/demo_custom_functions.py`
+
+---
+```
+
+**Expected Output (Unguided):**
+- Measured (Copilot CLI `gpt-5-mini`):
+  - original code base: **1 passed / 1 failed**
+  - new code base: **2 passed / 0 failed**
+
+Note: earlier runs hit collection errors due to top-level importing `demo_custom_functions` (it uses relative imports) and mixed prose/code output; our latest materialization step rewrites imports to `ProblemD.student.src...` and trims trailing non-code so pytest can collect.
+
+#### GUIDED PROMPT (Upgraded)
+
+```text
+You are generating pytest tests for a class exercise (Problem D_2).
+
+Output contract (must follow exactly):
+- return one runnable Python pytest file only
+- no prose, no markdown fences, no headings
+- do not run commands and do not create files
+
+Execution environment contract:
+- tests run from repository root
+- use these imports (exactly):
+  import pytest
+  from ProblemD.student.src.mini_autograd import Tensor
+  from ProblemD.student.src import demo_custom_functions as custom
+
+Goal:
+Write small, deterministic tests for autograd *graph semantics* (not just arithmetic).
+
+Mini-engine note (important for correct tests):
+- intermediate tensors in this mini engine also store `.grad` and it can accumulate
+- to test “two backward calls add to leaf grads” without changing upstream grad, rebuild the graph each time (preferred), or reset the output tensor’s grad before the second backward
+- do NOT call `out.backward()` twice on the same `out` tensor for FM2 unless you first reset `out.grad` (prefer rebuilding the graph)
+
+FM2 example pattern (preferred):
+- `out1 = x * 3.0; out1.backward(); out2 = x * 3.0; out2.backward(); assert x.grad == 6.0`
+
+Gradient sanity (avoid incorrect expected values):
+- do NOT confuse forward values with derivatives
+- example: if `out = x * 3.0`, then after `out.backward()` the expected `x.grad` is `3.0` (not `out.data`)
+
+Fault model (each must be killed by ≥1 test, tag each test with `# targets: FM*`):
+- FM1: shared subgraph does not accumulate grads (x used twice only counts once)
+- FM2: calling backward twice does not accumulate (grads overwritten instead of added)
+- FM3: `requires_grad` propagation is too strict/too loose for mixed (Tensor, constant)
+- FM4: `detach()` returns a tensor that still requires grad / participates in backprop
+- FM5: `zero_grad()` resets grad to None instead of numeric 0.0
+- FM6: custom boundary derivative is inverted for clamp-like ops (inside vs outside interval)
+- FM7: upstream grad scaling is not respected somewhere in the graph
+- FM8: backward on a tensor that does not require grad fails to raise (or raises wrong error)
+
+Required coverage:
+- at least one test for shared-subgraph accumulation
+- at least one test for repeated backward accumulation
+- detach semantics (must include a failure assertion using `pytest.raises(...)` when appropriate)
+- zero_grad semantics (numeric reset)
+- at least one boundary test for `custom.clamp01`
+
+Constraints:
+- deterministic scalar inputs only (no randomness)
+- explicit assertions (no print-only debugging)
+- use pytest only
+- do not modify implementation files
+```
+
+**Expected Output (Guided):**
+- Output is code-only pytest with pinned imports and “fault-model tagged” tests.
+- Measured (Copilot CLI `gpt-5-mini`):
+  - original code base: **3 passed / 5 failed**
+  - new code base: **8 passed / 0 failed**
 
 ---
 
-### Problem D_3: Standardized `axpy(a, x, y)` Tests
+### Problem D_3: Use an LLM to Generate Tests for the Standardized `axpy` Function
 
 **Evaluation Description:**  
-All students generate tests for the same function to support fair in-class comparison.
+The output should be a runnable pytest file for `axpy(a, x, y)` that checks forward correctness and multiple backward/edge-case behaviors, including upstream-gradient scaling.
 
-**Possible Behavior Discovery Checklist:**
+**Marking Criteria (checklist):**
+- Test file collects and runs under `pytest` from repo root.
+- Forward correctness: `axpy(a, x, y) == a*x + y` with explicit scalar assertions.
+- Backward correctness for all three inputs (`a`, `x`, `y`) using `.grad`.
+- Explicit upstream-gradient scaling test using `out.backward(grad=...)` with `grad != 1.0`.
+- Gradient-order correctness is asserted (mapping to `a.grad`, `x.grad`, `y.grad`).
+- Includes at least one edge case (zero/negative values or reuse).
+- **Reference check:** passes on the new code base (`ProblemD/instructor/solution`).
 
-| Check # | Description                         | Actual Baseline Behavior       | Expected Behavior                               |
-| ------- | ----------------------------------- | ------------------------------ | ----------------------------------------------- |
-| 1       | Forward check: `a*x + y`            | Missing due collection failure | Deterministic forward assertion                 |
-| 2       | Gradients for `a`, `x`, `y`         | Missing due collection failure | Correct per-input gradient checks               |
-| 3       | Gradient-order contract             | Missing due collection failure | Returned gradients mapped to input order        |
-| 4       | Upstream grad scaling               | Missing due collection failure | `backward(grad=...)` scaling asserted           |
-| 5       | Edge behavior (zero/negative/reuse) | Missing due collection failure | At least one edge case with explicit assertions |
-| 6       | Failure-path test                   | Missing due collection failure | At least one exception-path assertion           |
+#### UNGUIDED PROMPT (Baseline)
 
-**Expected Results:**
+```text
+### Problem D_3: Use an LLM to Generate Tests for the Standardized `axpy` Function
 
-- **Without structured prompts:** often non-runnable output and missed gradient-order checks.
-- **With structured prompts:** runnable tests that expose `axpy` contract violations.
+**Task Description:**  
+All students will use an LLM to generate pytest tests for the same function: `axpy(a, x, y)` in `ProblemD/student/src/demo_custom_functions.py`.  
+Your goal is to produce a clean, runnable test file for `axpy` and improve it through prompt refinement.
 
-**Measured Results:**
+You must document and submit:
+1. the model used,  
+2. the prompt(s) used,  
+3. the final generated/refined test code, and  
 
-- Baseline prompt: collection/import failure.
-- Guided prompt (phase 2): runnable suite, `2 passed / 4 failed`.
+**Starter Code:**  
+`ProblemD/student/src/demo_custom_functions.py`  
+`ProblemD/student/src/mini_autograd.py`
+
+---
+```
+
+**Expected Output (Unguided):**
+- Measured (Copilot CLI `gpt-5-mini`):
+  - original code base: **1 passed / 1 failed**
+  - new code base: **2 passed / 0 failed**
+
+Note: earlier runs hit collection errors due to mixed prose/code output and fragile import paths; our latest materialization step trims trailing non-code and normalizes imports so pytest can collect.
+
+#### GUIDED PROMPT (Upgraded)
+
+```text
+You are generating pytest tests for the standardized class task (Problem D_3).
+
+Target:
+- `axpy(a, x, y)` in `ProblemD/student/src/demo_custom_functions.py`
+
+Output contract (must follow exactly):
+- return one runnable Python pytest file only
+- no prose, no markdown fences, no headings
+- do not run commands and do not create files
+
+Execution environment contract:
+- tests run from repository root
+- use these imports (exactly):
+  import pytest
+  from ProblemD.student.src.mini_autograd import Tensor
+  from ProblemD.student.src.demo_custom_functions import axpy
+
+Contract:
+- forward: `axpy(a, x, y) = a * x + y`
+- backward (for scalar upstream grad g): grads must be in input order (a, x, y)
+  - d/da = g * x
+  - d/dx = g * a
+  - d/dy = g * 1
+
+Fault model (each must be killed by ≥1 test, tag each test with `# targets: FM*`):
+- FM1: gradient order is wrong (a and x swapped)
+- FM2: upstream grad argument is ignored (assumes g=1.0)
+- FM3: missing scaling factor in one partial derivative (sign/scale error)
+- FM4: reuse case does not accumulate correctly when the same Tensor is passed as multiple inputs
+
+Required tests:
+- forward correctness
+- backward correctness for all three inputs
+- explicit upstream scaling check using `out.backward(grad=...)` with grad != 1.0
+- gradient-order correctness (assert mapping to a.grad, x.grad, y.grad matches contract)
+- at least one edge case (zero or negative values)
+
+Constraints:
+- deterministic scalar inputs only
+- explicit assertions (no smoke tests)
+- use pytest only
+- do not modify implementation files
+```
+
+**Expected Output (Guided):**
+- Output is a single runnable pytest file with pinned imports and multiple discriminative assertions.
+- Measured (Copilot CLI `gpt-5-mini`):
+  - original code base: **1 passed / 5 failed**
+  - new code base: **6 passed / 0 failed**
 
 ---
 
-### Problem D_4: Bug-Fix Verification with Official Tests
+### Problem D_4: Bug-Fix Challenge Using Your Generated Tests
 
 **Evaluation Description:**  
-Students fix starter-code bugs using their generated tests, then validate against official tests.
+The output should be a single patch that fixes the original code base bugs while preserving the intended API and features. Correctness is verified by the official test suite.
 
-**Possible Bug Discovery Checklist:**
+**Marking Criteria (checklist):**
+- Output is a single patch block in the required `*** Begin Patch ... *** End Patch` format.
+- Patch updates **both** files:
+  - `ProblemD/student/src/mini_autograd.py`
+  - `ProblemD/student/src/demo_custom_functions.py`
+- Fixes core autograd contract issues (upstream grad, `requires_grad` propagation, chain rule scaling).
+- Fixes custom function backward contracts (axpy grad order, clamp01 boundary derivative).
+- Minimal targeted edits; no broad refactors; public APIs unchanged.
+- Passes `pytest -q ProblemD/instructor/tests` (expected **18 passed**).
 
-| Bug # | Description                                    | Actual Starter Behavior            | Expected Behavior                     |
-| ----- | ---------------------------------------------- | ---------------------------------- | ------------------------------------- |
-| 1     | Root backward ignores upstream gradient        | Uses `1.0` always                  | Uses provided upstream `grad`         |
-| 2     | Multiplication second-input gradient wrong     | Misses chain factor                | Uses `out.grad * self.data`           |
-| 3     | `__add__` grad propagation with constant wrong | Requires both inputs grad-enabled  | Requires grad if either input does    |
-| 4     | `detach()` keeps grad tracking                 | Detached tensor still tracks grad  | Detached tensor should not track grad |
-| 5     | `zero_grad()` reset policy wrong               | Sets grad to `None`                | Resets grad to `0.0`                  |
-| 6     | `relu()` positive-slope bug (case 1)           | Uses slope `0.5`                   | Uses slope `1.0`                      |
-| 7     | `relu()` positive-slope bug (case 2)           | Uses slope `0.5`                   | Uses slope `1.0`                      |
-| 8     | `exp()` derivative wrong                       | Uses `x` instead of `exp(x)`       | Uses forward output `exp(x)`          |
-| 9     | `axpy` backward gradient order mismatch        | Returns `(grad_x, grad_a, grad_y)` | Returns `(grad_a, grad_x, grad_y)`    |
-| 10    | `clamp01` grad for `x < 0` wrong               | Returns `1`                        | Returns `0`                           |
-| 11    | `clamp01` grad for `0 < x < 1` wrong           | Returns `0`                        | Returns `1`                           |
-| 12    | `clamp01` grad for `x > 1` wrong               | Returns `1`                        | Returns `0`                           |
+#### UNGUIDED PROMPT (Baseline)
 
-**Expected Results:**
+```text
+### Problem D_4: Bug-Fix Challenge Using Your Generated Tests
 
-- **Without structured prompts:** fixes target obvious failures but miss boundary/contract details.
-- **With structured prompts:** fixes are more focused with fewer regressions.
+**Task Description:**  
+Use the tests you generated/refined in Problems D_1–D_3 to identify and fix bugs in the starter implementation (you may use an LLM to propose patches, but you must verify them with tests):
+- `ProblemD/student/src/mini_autograd.py`
+- `ProblemD/student/src/demo_custom_functions.py`
 
-**Measured Results:**
+Requirements:
+1. Run your own tests first and use failures to guide debugging.
+2. Fix implementation bugs without deleting features.
+3. Keep your tests (and any LLM-generated tests) as evidence of how you found the bugs.
+4. Make sure your pass all your tests.
 
-- Baseline patch: `14/18` official tests passed.
-- Guided patch (phase 1): `10/18` official tests passed.
-- Guided patch (phase 2): `14/18` official tests passed.
 
+**Starter Code:**  
+`ProblemD/student/src/mini_autograd.py`  
+`ProblemD/student/src/demo_custom_functions.py`  
 ---
+```
 
-### Problem D: Guided vs. Unguided Summary
+**Expected Output (Unguided):**
+- Likely failure mode: model tries to edit files via tools (or outputs steps) rather than producing a single extractable patch.
+- Measured (Copilot CLI `gpt-5-mini`):
+  - Patch artifact: **materialize failed** (no patch block to extract reliably)
 
-| Problem | Baseline Outcome              | Guided Outcome (Phase 2)         | Guided Better? |
-| ------- | ----------------------------- | -------------------------------- | -------------- |
-| D_1     | collection error              | runnable (`1 passed / 4 failed`) | Yes            |
-| D_2     | collection error              | runnable (`2 passed / 4 failed`) | Yes            |
-| D_3     | collection error              | runnable (`2 passed / 4 failed`) | Yes            |
-| D_4     | `14/18` official tests passed | `14/18` official tests passed    | Tie            |
+#### GUIDED PROMPT (Upgraded)
+
+```text
+You are fixing bugs in a class exercise implementation (Problem D_4).
+
+Target files:
+- `ProblemD/student/src/mini_autograd.py`
+- `ProblemD/student/src/demo_custom_functions.py`
+
+Output contract (must follow exactly):
+- output only one patch in this format (no prose, no markdown fences):
+  *** Begin Patch
+  *** Update File: <relative path only>
+  @@
+  -old
+  +new
+  *** End Patch
+- do not run commands and do not create files
+- do not use absolute paths; do not use `..` path traversal
+- one patch may include multiple `*** Update File:` sections; keep them within the single Begin/End Patch
+- patch must include these two update headers (exactly):
+  - `*** Update File: ProblemD/student/src/mini_autograd.py`
+  - `*** Update File: ProblemD/student/src/demo_custom_functions.py`
+
+Patch goals (correctness contract):
+- respect upstream gradient argument in `Tensor.backward(grad=...)`
+- `__add__` should set `requires_grad` if either input requires grad
+- `__mul__` backward must multiply by upstream grad for both inputs
+- `zero_grad()` should reset leaf grad to `0.0`
+- `detach()` should return a tensor with `requires_grad=False`
+- `relu()` derivative should be `1.0` for positive input and `0.0` otherwise
+- `exp()` backward should use `exp(x)` (the forward output)
+- `Axpy.backward` gradient order must match inputs `(a, x, y)`
+- `Clamp01.backward` should return gradient `1` only for `0 < x < 1`, else `0`
+
+Constraints:
+- keep public APIs unchanged
+- preserve feature set
+- avoid broad refactors
+- make minimal targeted edits only
+```
+
+**Expected Output (Guided):**
+- Output is a single patch that updates both target files and fixes all contract items.
+- Measured (Copilot CLI `gpt-5-mini`):
+  - Official test suite (`ProblemD/instructor/tests`): **18 passed / 0 failed**
 
 ---

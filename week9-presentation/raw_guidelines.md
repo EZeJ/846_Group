@@ -377,6 +377,92 @@ State any assumptions as inline comments. Return only the test file.
 Generate tests for this code.
 ```
 
+
+
+
+## 4. Problem D Raw Guidelines
+
+### Guideline 4.1: Use a Fault Model (Mutation Mindset) to Drive Test Adequacy
+**Description:**  
+Instead of asking for “more tests” or “more coverage”, define a **fault model** up front: a short list of plausible bug classes for the target code. Then require the model to generate **at least one test that would fail** for each bug class.
+
+If the codebase does not have mutation-testing tooling, treat “mutants” as *plausible wrong implementations* (e.g., wrong gradient order, missing chain rule factor, wrong boundary derivative) and generate discriminative tests that would “kill” them.
+
+**Reasoning:**  
+The readings discuss that LLM-generated tests can execute successfully yet still miss defect-revealing behaviors, and that test adequacy should be evaluated against bug detection–oriented metrics (including mutation-based adequacy) rather than “runs without error” alone [1], [2], [5], [6]. A fault model makes adequacy concrete and auditable: you can check whether each bug class has a targeted, failing-if-buggy test.
+
+**Example:**  
+Problem D fault model snippet (mini autograd):
+* **Chain rule factor missing:** `mul` backward ignores upstream grad for one operand.
+* **Gradient order wrong:** `axpy` returns gradients in a different order than inputs.
+* **Requires-grad propagation wrong:** `add` requires both inputs to require grad.
+* **Detach semantics wrong:** detached tensor still tracks gradients.
+* **Boundary derivative wrong:** clamp-like function uses wrong derivative outside `(0, 1)`.
+
+Prompt requirement:
+```text
+Generate pytest tests that would FAIL if any fault-model item above exists.
+Write at least one explicit assertion per item. Return code only.
+```
+
+---
+
+### Guideline 4.2: Use a Prompt Card + Run Record (Traceability Protocol)
+**Description:**  
+For AI-assisted test generation, record a minimal “Prompt Card” alongside each run:
+* model name + version,
+* prompt ID and the exact prompt text (or a prompt-file path),
+* target files/functions,
+* command used to run tests,
+* generated artifact paths,
+* 1-line outcome summary (e.g., collection error / `X passed, Y failed`).
+
+**Reasoning:**  
+Practitioner guidance for Copilot-style workflows emphasizes that small prompt/context changes can significantly change output quality; without traceability, teams cannot compare results or reproduce “good” runs [9], [11]. A lightweight protocol also supports fair in-class evaluation because everyone can rerun the same prompt and verify outcomes [10].
+
+**Example:**  
+Prompt Card template:
+```text
+Prompt ID: D3_testgen_v2
+Model: Copilot CLI gpt-5-mini (2026-02-27)
+Target: demo_custom_functions.py::axpy
+Prompt (saved): exact prompt text captured for reruns
+Run: pytest -q <generated_test_file>
+Artifacts: <generated_test_file>; <pytest_log>
+Result: 2 passed, 4 failed (useful failing signals)
+```
+
+---
+
+### Guideline 4.3: Counterexample-First Prompting to Generate Discriminative Tests
+**Description:**  
+Before asking for final tests, first ask the model to propose **plausible wrong implementations** (or wrong assumptions) and the **minimal counterexamples** that distinguish them. Then prompt the model to generate tests that pass for the intended behavior and fail for each wrong variant.
+
+**Reasoning:**  
+In our Problem D runs, early test suites often checked only surface behavior and did not clearly distinguish between “nearly correct” variants (e.g., correct forward but wrong gradient order). Counterexample-first prompting forces the model to articulate discriminators and produces tests that are harder to satisfy accidentally. This aligns with findings that prompt structure affects test effectiveness and that LLM tests can be shallow/misaligned without stronger constraints [1], [2], [5].
+
+**Example:**  
+Counterexample-first prompt:
+```text
+List 4 plausible wrong implementations of `axpy(a, x, y)` backward
+(e.g., wrong grad order, missing chain factor, wrong upstream scaling).
+For each, give the smallest scalar inputs that expose the difference.
+Return a table: wrong_variant | symptom | counterexample_inputs.
+```
+
+Discriminative test prompt:
+```text
+Using the table above, write pytest tests that:
+1) pass for the intended contract, and
+2) would fail for each wrong_variant.
+Add a comment per test indicating which wrong_variant it targets.
+Return code only.
+```
+
+
+
+
+
 ---
 
 ## 4. References
@@ -400,6 +486,8 @@ Generate tests for this code.
 [9] GitHub Docs: Adding repository custom instructions for GitHub Copilot (`https://docs.github.com/en/copilot/how-tos/configure-custom-instructions/add-repository-instructions`).
 
 [10] "Writing Effective Prompts for Testing Scenarios: AI Assisted Quality Engineering" by Microsoft: `https://techcommunity.microsoft.com/blog/azuredevcommunityblog/writing-effective-prompts-for-testing-scenarios-ai-assisted-quality-engineering/4488001`
+
+[11] GitHub Docs: Prompt files for GitHub Copilot (`https://docs.github.com/en/copilot/tutorials/customization-library/prompt-files`).
 
 ---
 
