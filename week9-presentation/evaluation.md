@@ -20,6 +20,10 @@ Students should evaluate their testing approach based on these criteria:
 **Evaluation Description:**
 Students should discover **all 9 intentional bugs** when applying both guidelines properly. A vague one-shot prompt will miss most bugs. The bugs span interacting features (item-level discounts, three coupon types, loyalty points, shipping) so only a prompt that explicitly decomposes each business rule and tests boundary/combination cases will uncover them all.
 
+**Applicable Guidelines:**
+* Guideline 1: Specify the Testing Goal and Scope in the Prompt
+* Guideline 2: Use a Generate–Validate–Repair Loop Instead of One-Shot Generation
+
 **Possible Bug Discovery Checklist:**
 
 | Bug # | Description                                   | Actual Behavior                                                                         | Expected Behavior                                                                                    |
@@ -93,7 +97,7 @@ Write tests for this code.
 
 ---
 
-### Problem B_1: User Validation Testing
+## Problem B_1: User Validation Testing
 
 **Evaluation Description:**
 Students must identify bugs in the provided code. Using Guideline 3, they should find **at least 7 bugs**; the more bugs found, the better.
@@ -101,6 +105,9 @@ Students must identify bugs in the provided code. Using Guideline 3, they should
 You should compare bugs found using the checklist below with the bugs.
 
 ---
+
+**Applicable Guidelines:**
+* Guideline 3: Explicitly Request Boundary and Negative Test Cases
 
 #### **UNGUIDED PROMPT (Before Applying Guidelines)**
 
@@ -228,6 +235,9 @@ Decomposition should reveal logical flaws that black-box testing misses.
 You should compare bugs found using the checklist below with the bugs.
 
 ---
+
+**Applicable Guidelines:**
+* Guideline 4: Decompose Complex Methods Before Asking for Tests
 
 #### **UNGUIDED PROMPT (Before Applying Guidelines)**
 
@@ -381,6 +391,10 @@ You should compare bugs found using the checklist below with the bugs.
 
 ---
 
+**Applicable Guidelines:**
+* Guideline 3: Explicitly Request Boundary and Negative Test Cases
+* Guideline 4: Decompose Complex Methods Before Asking for Tests
+
 #### **UNGUIDED PROMPT (Before Applying Guidelines)**
 
 ```
@@ -399,30 +413,6 @@ Write pytest tests for data_parser.py. Test all the parsing functions to ensure 
   - No whitespace edge cases testing
   - Missing type validation testing
   - No comprehensive error message verification
-
-**Example of Typical Unguided Test Output:**
-
-```python
-def test_parse_csv_basic():
-    csv_data = "name,age\nJohn,30\nJane,25"
-    result = parse_csv_data(csv_data)
-    assert len(result) == 2
-
-def test_parse_json_basic():
-    json_data = '{"name": "John", "age": 30}'
-    result = parse_json_config(json_data)
-    assert result["name"] == "John"
-
-def test_extract_numbers_basic():
-    text = "I have 5 apples and 3.5 oranges"
-    result = extract_numbers(text)
-    assert 5.0 in result
-
-def test_normalize_whitespace_basic():
-    text = "Hello   World"
-    result = normalize_whitespace(text)
-    assert result == "Hello World"
-```
 
 ---
 
