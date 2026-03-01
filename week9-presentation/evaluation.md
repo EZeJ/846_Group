@@ -854,7 +854,7 @@ def test_test_client_context_manager_allows_request_local_access():
 ```
 ---
 
-## 3. Problem D Evaluation
+## Problem D Evaluation
 
 ### Problem D_1: Baseline Test Generation for Mini Autograd
 
