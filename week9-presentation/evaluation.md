@@ -600,6 +600,302 @@ For each failure:
 |     Tests failed |        0 |      1 |
 | Passes threshold |    False |   True |
 
+
+**Unguided test file**:
+
+```python
+import os
+from datetime import timedelta
+
+import pytest
+
+from flask import Flask
+
+
+def test_get_send_file_max_age_various_types():
+	app = Flask("testapp")
+
+	# default is None
+	app.config["SEND_FILE_MAX_AGE_DEFAULT"] = None
+	assert app.get_send_file_max_age("foo.txt") is None
+
+	# integer seconds are returned as-is
+	app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 3600
+	assert app.get_send_file_max_age("foo.txt") == 3600
+
+	# timedelta is converted to seconds
+	app.config["SEND_FILE_MAX_AGE_DEFAULT"] = timedelta(seconds=7200)
+	assert app.get_send_file_max_age("foo.txt") == 7200
+
+
+def test_open_resource_modes(tmp_path):
+	# create an app with a controlled root_path
+	root = tmp_path / "approot"
+	root.mkdir()
+
+	fpath = root / "data.txt"
+	fpath.write_text("hello\n")
+
+	app = Flask("testapp", root_path=str(root))
+
+	# invalid mode should raise
+	with pytest.raises(ValueError):
+		app.open_resource("data.txt", mode="w")
+
+	# text read
+	with app.open_resource("data.txt", mode="r", encoding="utf-8") as fh:
+		assert fh.read() == "hello\n"
+
+	# binary read
+	with app.open_resource("data.txt", mode="rb") as fh:
+		assert fh.read() == b"hello\n"
+
+
+def test_make_shell_context_runs_processors():
+	app = Flask("testapp")
+
+	@app.shell_context_processor
+	def _proc():
+		return {"answer": 42}
+
+	ctx = app.make_shell_context()
+	assert "app" in ctx and "g" in ctx
+	assert ctx["answer"] == 42
+
+```
+
+**Guided test file**:
+
+```python
+
+import os
+import sys
+from datetime import timedelta
+
+import pytest
+
+# Ensure tests import the local Flask package bundled in the workspace
+HERE = os.path.dirname(__file__)
+LOCAL_FLASK_SRC = os.path.abspath(os.path.join(HERE, "..", "flask", "src"))
+if LOCAL_FLASK_SRC not in sys.path:
+    sys.path.insert(0, LOCAL_FLASK_SRC)
+
+from flask import Flask, Blueprint, abort, session
+
+
+def test_send_static_file_serves_file_and_respects_timedelta_cache(tmp_path):
+    from flask import send_from_directory
+
+    app = Flask(__name__, static_folder=str(tmp_path))
+    # create a static file
+    p = tmp_path / "foo.txt"
+    p.write_bytes(b"hello")
+
+    app.config["SEND_FILE_MAX_AGE_DEFAULT"] = timedelta(seconds=60)
+
+    client = app.test_client()
+    # ensure a static route exists for testing (some setups may not auto-register)
+    app.add_url_rule(
+        "/static/<path:filename>",
+        endpoint="static",
+        view_func=lambda filename: send_from_directory(str(tmp_path), filename, max_age=app.get_send_file_max_age(filename)),
+    )
+
+    resp = client.get("/static/foo.txt")
+    assert resp.status_code == 200
+    assert resp.data == b"hello"
+    # Cache-Control should include max-age=60
+    cc = resp.headers.get("Cache-Control", "")
+    assert "max-age=60" in cc
+
+
+def test_send_static_file_not_found_returns_404(tmp_path):
+    app = Flask(__name__, static_folder=str(tmp_path))
+    client = app.test_client()
+    resp = client.get("/static/does-not-exist.txt")
+    assert resp.status_code == 404
+
+
+def test_url_for_outside_request_requires_server_name():
+    app = Flask(__name__)
+
+    @app.route("/")
+    def index():
+        return "ok"
+
+    # calling url_for outside a request context with _external=True and
+    # without SERVER_NAME should raise a RuntimeError
+    with pytest.raises(RuntimeError):
+        app.url_for("index", _external=True)
+
+
+def test_url_for_blueprint_relative_inside_request():
+    app = Flask(__name__)
+    bp = Blueprint("bp", __name__, url_prefix="/bp")
+
+    @bp.route("/x")
+    def x():
+        return "ok"
+
+    app.register_blueprint(bp)
+
+    with app.test_request_context("/bp/x"):
+        # blueprint-relative endpoint should resolve to the blueprint's URL
+        u = app.url_for(".x")
+        assert u.startswith("/bp")
+
+
+def test_make_response_handles_various_return_types():
+    app = Flask(__name__)
+
+    @app.route("/json")
+    def j():
+        return {"a": 1}
+
+    @app.route("/tuple")
+    def t():
+        return ("body", 201, {"X-Test": "yes"})
+
+    client = app.test_client()
+    r1 = client.get("/json")
+    assert r1.is_json and r1.get_json() == {"a": 1}
+
+    r2 = client.get("/tuple")
+    assert r2.status_code == 201
+    assert r2.headers.get("X-Test") == "yes"
+
+
+def test_options_automatic_uses_default_options_response():
+    app = Flask(__name__)
+
+    @app.route("/onlyget", methods=("GET",))
+    def onlyget():
+        return "ok"
+
+    client = app.test_client()
+    resp = client.options("/onlyget")
+    assert resp.status_code in (200, 204)
+    allow = resp.headers.get("Allow", "")
+    # Should include GET and OPTIONS
+    assert "GET" in allow
+    assert "OPTIONS" in allow
+
+
+def test_before_request_short_circuit():
+    app = Flask(__name__)
+
+    @app.before_request
+    def short():
+        # short-circuit by returning a non-None value
+        return "short"
+
+    @app.route("/")
+    def index():
+        pytest.fail("view should not be called when before_request returns a value")
+
+    client = app.test_client()
+    r = client.get("/")
+    assert r.data == b"short"
+
+
+def test_after_request_can_modify_response():
+    app = Flask(__name__)
+
+    @app.after_request
+    def add_header(resp):
+        resp.headers["X-After"] = "yes"
+        return resp
+
+    @app.route("/resp")
+    def resp():
+        return "body"
+
+    client = app.test_client()
+    r = client.get("/resp")
+    assert r.headers.get("X-After") == "yes"
+
+
+def test_error_handler_for_http_exception_used():
+    app = Flask(__name__)
+
+    @app.errorhandler(404)
+    def not_found(e):
+        return "custom404", 404
+
+    client = app.test_client()
+    r = client.get("/no-such-route")
+    assert r.status_code == 404
+    assert b"custom404" in r.data
+
+
+def test_user_exception_propagates_when_testing_true():
+    app = Flask(__name__)
+    app.testing = True
+
+    @app.route("/boom")
+    def boom():
+        raise ValueError("boom")
+
+    client = app.test_client()
+    with pytest.raises(ValueError):
+        client.get("/boom")
+
+
+def test_preprocess_request_url_value_preprocessor_modifies_view_args():
+    app = Flask(__name__)
+
+    bp = Blueprint("bp2", __name__, url_prefix="/bp2")
+
+    @bp.url_value_preprocessor
+    def add_flag(endpoint, values):
+        # inject a value used by the view
+        if values is not None:
+            values.setdefault("injected", "yes")
+
+    @bp.route("/show/<name>")
+    def show(name, injected=None):
+        # url_value_preprocessor adds the key into the view args,
+        # so accept it as a parameter on the view
+        return f"{name}-{injected}"
+
+    app.register_blueprint(bp)
+    client = app.test_client()
+    r = client.get("/bp2/show/alice")
+    assert r.data == b"alice-yes"
+
+
+def test_session_saved_in_response_cookie():
+    app = Flask(__name__)
+    app.secret_key = "secret"
+
+    @app.route("/set")
+    def set():
+        session["x"] = "1"
+        return "ok"
+
+    client = app.test_client()
+    r = client.get("/set")
+    # session cookie should be set
+    sc = r.headers.get("Set-Cookie")
+    assert sc is not None
+    assert "session=" in sc.lower()
+
+
+def test_test_client_context_manager_allows_request_local_access():
+    app = Flask(__name__)
+
+    @app.route("/")
+    def index():
+        return "ok"
+
+    with app.test_client() as c:
+        c.get("/?vodka=42")
+        # inside the client context the request context should be available
+        from flask import request
+
+        assert request.args["vodka"] == "42"
+
+```
 ---
 
 ## 3. Problem D Evaluation
