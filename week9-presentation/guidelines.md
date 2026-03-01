@@ -19,11 +19,11 @@
 |   B_2 | 4      |
 |   B_3 |  3 , 4 |
 |   С |  5 |
-| D | 6, 7, 8 |
+| D | 3, 6, 7 |
 | D_1 | 6, 7 |
-| D_2 | 6, 7, 8 |
-| D_3 | 6, 7, 8 |
-| D_4 | 7, 8 |
+| D_2 | 3, 6, 7 |
+| D_3 | 3, 6, 7 |
+| D_4 | 3, 7 |
 
 
 ## 1. Guidelines for Testing
@@ -103,11 +103,11 @@ and return a corrected test file. Do not modify checkout_service.py.
 
 ---
 
-### Guideline 3: Explicitly Request Boundary and Negative Test Cases 
+### Guideline 3: Explicitly Request Boundary and Negative Cases, Strong Assertions
 
 **Description:**  
 
-Do not rely on the LLM to independently enumerate edge cases. In the prompt, explicitly require categories of non-happy-path tests and (ideally) minimum counts. At a minimum, request:
+Do not rely on the LLM to independently enumerate edge cases. In the prompt, explicitly require categories of non-happy-path tests with (ideally) minimum counts and strong assertions. At a minimum, request:
 
 * Boundary values: min/max, zero, empty string/collection, single-element, off-by-one
 
@@ -115,29 +115,64 @@ Do not rely on the LLM to independently enumerate edge cases. In the prompt, exp
 
 * Invalid formats: malformed JSON/CSV, invalid dates, illegal enum values, wrong encoding
 
-* Exception/error paths: inputs that must trigger validation failures or thrown exceptions
+* Exception/error paths: inputs that must trigger validation failures or thrown exceptions (use `pytest.raises` or equivalent)
 
 * State/contract violations: precondition breaches, invalid state transitions (if applicable)
 
+* Invariant/property checks: conditions that must always hold regardless of input
+
+* Strong assertions: not just "test runs without crashing", but verify exact expected outputs, state changes, and side effects
+
 **Reasoning:**  
-LLMs usually generate “happy-path” tests first. They often don’t invent the weird or extreme inputs that actually trigger validation errors and exception branches. The papers [2] [5] show that many bugs are missed because the tests don’t hit those paths, so you need to tell the model directly to create boundary and negative cases.
+LLMs usually generate "happy-path" tests first. They often don't invent the weird or extreme inputs that actually trigger validation errors and exception branches. The papers [2] [5] show that many bugs are missed because the tests don't hit those paths, so you need to tell the model directly to create boundary and negative cases.
 
 **Example:**  
 
 **Good Example:**
 ```
-“Generate **JUnit 5 unit tests** for `parseInvoice(String json)`.
+Generate pytest unit tests for the user validation module in `user_validator.py`.
 
-Required categories (at least **2 tests each**):
+The module contains four validation functions: validate_email(), validate_age(), validate_username(), and validate_password().
 
-1. Boundary: empty string, very large numeric fields, empty items list
-2. Null/Missing: missing required keys (`invoiceId`, `items`), null values where allowed/disallowed
-3. InvalidFormat: malformed JSON, wrong field types (string instead of number)
-4. ExceptionPath: inputs that must throw `InvalidInvoiceException`
-    
-Constraints: no database/network; use parameterized tests”
+**Required test categories for EACH function (minimum 2 tests per category):**
+
+1. **Boundary Cases:**
+   - Empty strings
+   - Minimum/maximum length values
+   - Off-by-one conditions (e.g., length 2, 3, 30, 31 for username)
+   - Edge numeric values (0, negative, very large numbers for age)
+
+2. **Null/Missing Inputs:**
+   - None values
+   - Missing parameters where applicable
+
+3. **Invalid Format Cases:**
+   - For email: consecutive dots, consecutive special chars, starting with special char, no @ symbol, no domain
+   - For username: starting with numbers, all numbers, special characters beyond underscore
+   - For password: missing uppercase, missing digits, missing special characters, too short
+
+4. **Exception Paths:**
+   - TypeError for None inputs
+   - Proper True/False returns for valid/invalid inputs
+
+**Framework:** pytest with @pytest.mark.parametrize for efficient testing
+**Constraints:** 
+- Do not modify user_validator.py
+- Each test must have clear assertions
+- Use descriptive test names that indicate what is being tested
+
+Generate comprehensive tests that will expose validation bugs.
 ```
-    
+
+**Example with Independent Verification:**
+```
+For `parse_record`, include:
+- 2 boundary tests with exact output verification,
+- 2 malformed-input tests with `pytest.raises`,
+- 1 invariant test that checks a property holds for all valid inputs.
+
+After generation, run the independent grader and report any missed categories.
+```
 
 **Bad Example:**
 ```
@@ -305,35 +340,6 @@ Fix it.
 ```
 
 ---
-
-### Guideline 8: Require Strong Coverage + Strong Assertions, Then Verify with an Independent Suite
-**Description:**  
-Require both coverage breadth and assertion strength:
-* boundary values and off-by-one cases,
-* null/missing and malformed inputs,
-* explicit exception-path checks (`pytest.raises`),
-* invariant/property checks where applicable.
-
-Then verify against an independent oracle (official tests, hidden grader, or reference suite).
-
-**Reasoning:**  
-LLM-generated suites often overfit happy paths and miss critical failure behavior [2], [5]. Independent verification is needed to avoid false confidence from weak or redundant assertions [1], [6].
-
-**Good Example:**
-```text
-For `parse_record`, include:
-- 2 boundary tests,
-- 2 malformed-input tests with `pytest.raises`,
-- 1 invariant test.
-
-After generation, run the independent grader and report missed categories.
-```
-
-**Bad Example:**
-```text
-Generate a few basic tests that run.
-```
-
 
 ## 2. References
 
