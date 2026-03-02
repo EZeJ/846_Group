@@ -9,18 +9,19 @@
 
 ### Problem A: Checkout Service Testing
 
-Use the GPT-4 model as the preferred option.
+Use the GPT-4 model for this problem.
 
 **Task Description:**
 You have a checkout service module for an online store. This service handles item-level discounts (flash sales, bundle deals), three distinct coupon types (`SAVE10`, `SUMMER20`, `FLASH5`), a loyalty-points redemption system, shipping cost rules, tax calculation, and payment processing. You need to create unit tests that uncover if the implementation has any bugs.
 
 **Starter Code:**
 See `checkout_service.py` in the `problem_A` folder.
+
 ---
 
 ## Problem B 
 
-> All tasks should be completed in Python using pytest. Use the GPT-4 model as the preferred option. For testing, use the `@pytest.mark.parametrize` decorator to efficiently check multiple input cases and uncover bugs in the functions.
+> All tasks should be completed in Python using pytest. Use the GPT-4 model for this problem set. For testing, use the `@pytest.mark.parametrize` decorator to efficiently check multiple input cases and uncover bugs in the functions.
 
 ### Problem B_1: User Validation Testing
 
@@ -29,6 +30,7 @@ You are given a user validation module with functions that validate email addres
 
 **Starter Code:**  
 See `user_validator.py` in the ProblemB/Problem_B_1 folder.
+
 ---
 
 ### Problem B_2: Order Processing Decomposition (Guideline 4 Focus)
@@ -54,7 +56,7 @@ See `data_parser.py` in the ProblemB/Problem_B_3 folder.
 
 ### Problem C: Reach target test coverage
 
-Use the GPT-5-mini model as the preferred option.
+Use the GPT-5-mini model for this problem.
 
 Generate tests for FLASK `app.py` file and 
 use `eval_test_coverage.py` to measure how well LLM-generated tests cover the functionality in it. 
@@ -133,10 +135,5 @@ Requirements:
 **Starter Code:**  
 `ProblemD/student/src/mini_autograd.py`  
 `ProblemD/student/src/demo_custom_functions.py`  
----
-
-
-
-
 
 ---

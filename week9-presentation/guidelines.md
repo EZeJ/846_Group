@@ -247,11 +247,6 @@ Constraints: don’t test DB/network; use mocks; clear assertions.”
 “Write tests for `processOrder`. Generate unit tests for processOrder(Order o) that ensure it works correctly. Cover the main functionality and make sure the tests pass. Use standard assertions.”
 ```
 ##### P.S. The guideline and the prompt examples where rephrased and improved by GPT-4.1.
----
-
-
-
-
 
 ---
 
@@ -472,6 +467,7 @@ Then: write one pytest test per V*, tagged `# targets: V*`, return code only.
 ```
 
 **Why it helped:** it pushed the model to propose discriminators first, then encode them as assertions, reducing tests that accidentally pass buggy implementations.
+
 ---
 
 ## 2. References
