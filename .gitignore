@@ -3,3 +3,5 @@ main_agent.agent.md
 __pycache__
 __init__.py
 .pytest_cache
+starter_code_before/
+starter_code_after/
