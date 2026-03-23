@@ -1,4 +1,4 @@
-# Week X Feedback: Performance
+# Week 11 Feedback: Performance
 
 **Authors:** Liliana Hotsko, Alina Lytovchenko, Sofiia Tkach, Zesheng(Ethan) Jia
 
