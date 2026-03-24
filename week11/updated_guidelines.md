@@ -638,3 +638,196 @@ good second []
 This version remains fast on repeated queries while staying correct when the list is reused but its contents change.
 
 ---
+
+
+
+# Part 4
+
+## Problem: Real-Time Product Recommendations
+
+**Task Description:**
+Process 500,000 user interactions (views, clicks, purchases) and generate a report with the top 10 products by purchase count.
+
+---
+
+## Codebase: 
+
+```updated_guideline_new/product_recommender_original.py```
+
+---
+
+## 2. Guidelines that didn't work for Problem B
+
+### 2.1 Old Guideline 4: Use Execution Profiler Traces for Optimizing a Program
+
+**Description:**
+Ask Copilot to run a profiler (e.g., Python's line_profiler) on the code and then use the profiler output
+to optimize the code. line_profiler outputs what percentage of runtime was spent on each line of code.
+This ensures the LLM reasons about measured hotspots rather than guessing where the slow code is.
+
+**Reasoning:**
+EffiLearner [1] demonstrates that feeding runtime profiling traces back to the LLM grounds optimization
+suggestions in actual execution data rather than static code inspection. Without this, the LLM may optimize
+low-impact paths while missing the true bottleneck. Including the trace output shifts the LLM's attention to
+lines or functions with the highest measured cost.
+Notes for implementing these guidelines: Ensure that line_profiler is installed using pip install
+line_profiler before you ask Copilot to run the profiler using kernprof -l -v
+incident_reporter.py. You may install it in a virtual environment and ask Copilot to activate that venv
+before trying to run the profiler. If you need any help with this step, call out for help, I'll be happy to assist.
+
+
+
+
+**Good Example (Old Guideline):**
+```
+You are optimizing this Python script for runtime performance while 
+preserving correctness. Keep all built-in tests passing. 
+ 
+Instructions: 
+1. First, run the file without changes to check the timing `python 
+incident_reporter.py`. 
+2. Identify optimizations and make the improvements to the code. 
+3. After making your edits, run the file again to see the new benchmark 
+time. 
+4. If the time doesn't improve, iterate more fixes in order to fix the 
+slow code as much as possible. 
+```
+
+
+
+**Bad Example (Using Old Guideline):**
+```
+The incident_reporter.py code is slow. Here's what I need:
+
+1. Profile the code and identify the slowest functions
+2. The parse_user_agent function is called 900,000 times per test—
+   optimize it to be faster
+3. Consider adding memoization or caching to avoid redundant work
+4. Look for other micro-optimization opportunities (e.g., repeated 
+   dictionary lookups, inefficient string operations)
+5. Don't restructure the code—just make the hotspots faster
+6. Measure the speedup with the baseline timing
+7. Run the tests to make sure nothing breaks
+
+Expected improvement: 10-30% speedup if you're lucky.
+```
+
+**Prompt Used:**
+
+```
+Profile the code to find slow functions:
+1. Run: python3 -m cProfile product_recommender.py
+2. Identify hottest functions
+3. Optimize them with caching, vectorization, etc.
+4. Measure improvement
+```
+
+**Result with Old Guideline:**
+- Profiler shows `compute_user_embedding` taking 40% of time
+- Profiler shows `compute_product_features` taking 35% of time
+- Profiler shows similarity computation taking 20% of time
+- Solution: Cache embeddings, vectorize dot products, add multiprocessing
+
+
+**Why it didn't work:**
+- Optimized the **hottest functions** (embeddings, features)
+- Optimized the **wrong code path** entirely
+- Never asked: "Are these computations in the output?" (when they were actually not)
+- Actual speedup: 1.2× (18s → 15s)
+
+---
+
+## Updated Guideline: Use Execution Profiler Traces for Optimizing a Program and detect unnecessary Functionality
+ 
+_The guideline was improved with help of Claude Haiku 4.5_
+
+**Description:**
+Instead of profiling expensive code to make it faster, first ask what the output actually requires. Delete all computations not needed for the output, then optimize what remains. This eliminates waste at the source before spending time on micro-optimization.
+
+**Reasoning:**
+The old guideline assumes the algorithm is mostly correct and just needs tuning. But in this problem, the algorithm computes 6 multi-pass operations to generate a 10-line string. The profiler will show embeddings and features as hotspots—because they ARE expensive. But it never asks "is this in the output?" For this problem, the answer is NO: nothing related to embeddings, features, or similarity appears anywhere in the output. Specification-first reveals this waste immediately.
+
+**Good Example (Used as the main prompt):**
+```
+Optimize your code using specification-first analysis.
+
+PHASE 1: OUTPUT SPECIFICATION ANALYSIS (Do this FIRST)
+
+Step 1a: What is the actual output?
+  - Find the main function that generates the output
+  - What exactly does it return?
+  - Write down the format (string, dict, list?)
+
+Step 1b: What data must I compute?
+  - For each output field, trace backward
+  - What is the MINIMUM data needed to generate this?
+  - Write it down
+
+Step 1c: Audit intermediate structures
+  Search the code for every variable being computed:
+  - For EACH variable: "Is this in the output?"
+  - Mark as DELETE or KEEP
+
+Step 1d: Calculate waste
+  Count total passes through data
+  Count passes needed for output only
+  Calculate: (unnecessary passes / total) × 100 = waste %
+
+PHASE 2: ALGORITHM REDESIGN
+
+Step 2a: Single pass analysis
+  Can all output be computed in ONE pass?
+  If NO, justify why
+
+Step 2b: Minimal data structures
+  Keep only: structures needed for output
+  Delete: everything else
+
+Step 2c: Delete and refactor
+  Remove all code marked for deletion
+  Keep only minimum viable algorithm
+
+PHASE 3: MEASURE
+  Time the refactored code
+  Compare with baseline
+  Calculate actual speedup
+```
+
+**Bad Example (Using Old Guideline):**
+
+```
+Optimize product_recommender.py for speed.
+
+Steps:
+1. Profile the code: python3 -m cProfile product_recommender.py
+2. The profiler shows these hotspots:
+   - compute_user_embedding: 40% of time
+   - compute_product_features: 35% of time
+   - similarity computation: 20% of time
+3. Optimize these functions:
+   - Add caching to embeddings
+   - Vectorize feature computation with numpy
+   - Use numba for similarity
+   - Add multiprocessing
+4. Measure: should get 20-30% speedup
+5. If not, micro-optimize loops and variable binds
+```
+
+**Results with Updated Guideline:**
+
+<!-- | Approach | Time | Speedup | Reasoning |
+|----------|------|---------|-----------|
+| Original | 18s | — | 6 passes, expensive operations |
+| Old Guideline (profile-first) | 15s | 1.2× | Optimized hotspots but kept waste |
+| Updated Guideline Phase 1-2 | 0.95s | 18.9× | Deleted 5 unnecessary passes |
+| Updated Guideline Phase 3 | 0.85s | 21.2× | Optimized minimal single-pass code | -->
+
+
+- Original approach: 6 passes, expensive operations 
+- Old Guideline: Optimized hotspots but kept waste
+- pdated gudeline phase 1-2: Deleted 5 unnecessary passes
+- Updated gudeline phase 3: Optimized minimal single-pass code 
+
+**Why the Updated Guideline Worked:**
+
+The old guideline optimized slow functions. The updated guideline eliminated the root cause - unnecessary functions. Embeddings, features, and similarity scores are computed but never used. The profiler shows them as expensive because they really are expensive — but it doesn't show that they're unnecessary. Specification-first analysis asks "is this in the output?" and deletes the answer "no" immediately, before any profiling begins. After deleting the unused parts, the faster because waste is gone already before the needed algorithms are improved.
