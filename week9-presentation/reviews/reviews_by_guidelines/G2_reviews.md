@@ -472,3 +472,55 @@ The `xfail` mechanism is also important — it means the suite stays green (sati
 | No traceability for repair decisions                 | Each xfail has a reason string documenting the spec violation                          |
 
 ---
+
+
+
+
+
+
+
+
+
+
+# Summary of G2:
+
+
+#### Updated Guideline 2: Repair with Contract Preservation Constraints
+
+When entering the repair phase:
+
+1. Restate the intended contract explicitly.
+2. Require explanation of root cause before modification.
+3. Forbid weakening assertions.
+4. Forbid broad exception catching.
+5. Require strong assertions using pytest.raises where applicable.
+
+---
+
+**Revised Repair Prompt:**
+
+```
+The test failed with:
+ValueError: division by zero
+
+Contract:
+- divide(10, 0) must raise ValueError.
+
+Explain whether the failure indicates a test bug or implementation bug.
+Do not weaken assertions.
+Return corrected pytest tests.
+```
+
+
+
+#### Updated Guideline 2: Spec-Anchored Generate–Validate–Repair Loop
+
+**Description of the fix:**
+
+We add a **spec-anchoring classification step** before any repair. Instead of asking the LLM to simply "fix the tests," we require it to compare each failing assertion against the original specification (docstrings, prompt requirements, API contracts) and classify the failure:
+
+- **(A) TEST BUG** — the assertion contradicts the spec → fix the test.
+- **(B) IMPL BUG** — the assertion matches the spec but the code disagrees → keep the assertion, mark `@pytest.mark.xfail(reason="IMPL BUG: ...")` so the suite is runnable.
+- **(C) UNCLEAR** — the spec is ambiguous → flag for human review.
+
+This preserves bug-detecting tests rather than deleting them.
