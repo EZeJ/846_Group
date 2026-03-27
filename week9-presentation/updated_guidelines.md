@@ -258,224 +258,102 @@ Step 2: Generate focused tests for each behavior.
 ```
 
 ---
-
-### Guideline 5: Use a Fault Model (Mutation Mindset) to Drive Test Adequacy
+### Guideline 5: Ground the Fault Model in the Trusted Spec Before Using It to Drive Test Adequacy
 **Description:**  
-Instead of asking an LLM for “more tests”, define a short **fault model** (plausible bug classes) and require at least one test that would fail for each bug class. Treat “mutants” as plausible wrong implementations when mutation tooling is unavailable, and label each test by the fault-model item it targets.
+Do not ask an LLM for “more tests” from a fault model alone. First ground testing in a trusted specification: the intended behavior, public contract, README, or worked examples. Then build a fault model using only plausible deviations from that spec. Require at least one test per fault item, and reject any expected result that is not supported by the specification.
 
 **Reasoning:**  
-LLM-generated tests can run successfully but still miss defect-revealing behaviors. The readings emphasize adequacy tied to bug detection (including mutation-oriented thinking), not just execution success [1], [2], [5], [6]. A fault model makes it explicit what the tests must distinguish.
+A fault model is useful only if it refines the real contract rather than replacing it. Without a trusted spec, the model can invent alternate meanings of the function and produce tests that look rigorous but assert the wrong behavior. Grounding the fault model in the spec keeps mutation-style testing focused on real defect-revealing behavior instead of fabricated semantics [1], [2], [5], [6].
 
-**How to apply (checklist):**
-* Write 6–10 fault-model items (plausible “near-correct” bugs), not vague goals.
-* Make each item testable: “if this bug exists, what observable behavior changes?”
-* Require **at least one explicit assertion per item** (value, exception, state/side-effect).
-* Prefer minimal counterexamples (small scalars/small arrays) so failures are easy to debug.
-* Add a short tag/comment in each test (e.g., `# targets: FM3 swapped-arg-order`) so adequacy is auditable.
-
-**Prompt template (copy/paste):**
+**Example:**  
 ```text
-Generate pytest unit tests for <TARGET> (file/function/class below).
+Target: clamp(value, lo, hi)
+Trusted spec:
+- if value < lo, return lo
+- if value > hi, return hi
+- otherwise return value
 
-Contract (what is correct): <1–5 bullets>.
-
-Fault model (each must be “killed” by ≥1 test):
-- FM1: <plausible wrong behavior>
-- FM2: <plausible wrong behavior>
-...
+Fault model:
+- FM1: above-upper-bound values are returned unchanged instead of clamped to hi
+- FM2: below-lower-bound values are returned unchanged instead of clamped to lo
+- FM3: boundary value value == lo is mishandled
+- FM4: boundary value value == hi is mishandled
+- FM5: in-range values are incorrectly replaced by a bound
 
 Requirements:
-- For each FM*, include at least one test with a clear assertion that would FAIL if FM* exists.
-- Add a comment `# targets: FM*` in each test.
-- Use small inputs and deterministic assertions.
-- Return code only.
+- each FM must map to the trusted spec above
+- each test must include an assertion justified by the spec
+- add `# targets: FM*` in each test
+- return code only
 ```
 
-**Good Example:**
-```text
-Fault model (general examples):
-- off-by-one at boundary (e.g., `<=` vs `<`)
-- wrong exception type or missing exception
-- swapped argument order / wrong return ordering
-- missing scaling factor / sign error
-
-Fault model (Problem D / mini-autograd examples):
-- missing chain-rule factor in backward
-- gradient order swapped vs inputs
-- requires-grad propagation too strict/too loose
-- detach does not stop gradient tracking
-- wrong boundary derivative (e.g., clamp-like op)
-
-Requirement: add at least one test that would fail for each item above.
-```
-
-**Bad Example:**
-```text
-Write several tests that call the function and check it does not crash.
-```
-
-#### Problem D Showcase (D_2, D_3)
-Problem D is intentionally full of “near-correct” gradient bugs in `ProblemD/student/src/mini_autograd.py` and `ProblemD/student/src/demo_custom_functions.py`, so a fault model is an efficient way to force discriminative tests.
-
-```text
-Fault model to kill (Problem D):
-- FM1: Tensor.backward(grad=...) ignores the explicit upstream grad argument
-- FM2: add() sets requires_grad with AND instead of OR (mixing tensor + constant)
-- FM3: mul() backward misses upstream scaling for one operand (chain rule factor)
-- FM4: shared subgraph does not accumulate grads (x used twice only counts once)
-- FM5: detach() returns a tensor that still requires grad / participates in backprop
-- FM6: zero_grad() resets grad to None instead of 0.0 (breaks repeated backward)
-- FM7: relu() backward uses wrong slope for x>0 (should be 1.0)
-- FM8: exp() backward uses x instead of exp(x) as derivative
-- FM9: Axpy.backward returns grads in wrong order (a/x swapped)
-- FM10: Clamp01.backward returns grad_out outside (0,1) and 0 inside (inverted)
-
-Requirement: one pytest test per FM*, each tagged `# targets: FM*`,
-with an explicit assertion that would FAIL if FM* exists.
-```
-
-**Why it helped:** it prevented “smoke tests” and forced tests to kill specific plausible bugs (especially gradient scaling, ordering, and accumulation).
+Problem D is still a useful illustrative problem for this guideline because the mini-autograd engine contains many near-correct bugs, but the fault model should still be tied back to the intended gradient contract rather than to invented mutant behavior.
 
 ---
 
-### Guideline 6: Use a Prompt Card + Run Record (Traceability Protocol)
+### Guideline 6: Use a Prompt Card + Run Record, Including Edge Cases
 **Description:**  
 For every AI-assisted test run, record:
 * model name + version,
+* unique prompt ID,
+* environment and timestamp, including random seeds or other nondeterminism settings when applicable,
 * prompt ID + exact prompt (or prompt-file path),
-* target code under test,
+* target task or code under test,
+* required edge cases and acceptance criteria,
 * run command,
 * generated artifact paths,
 * 1-line outcome summary.
 
 **Reasoning:**  
-Small prompt/context changes can materially change generated tests. Tooling guidance encourages prompt files and repository instructions to make outcomes reproducible and comparable across a team [10], [9]. A minimal record makes evaluation fair and debuggable.
+Small prompt and context changes can materially change generated tests. Tooling guidance encourages prompt files and repository instructions to make outcomes reproducible and comparable across a team [9], [10]. Listing the edge cases up front makes the run record useful for debugging, not just bookkeeping.
 
-**How to apply (checklist):**
-* Save the prompt text in a file (not only in chat history), e.g., `prompt_<ID>.txt`.
-* Save generated tests as a separate artifact, e.g., `generated_<ID>_tests.py`.
-* Save the run output (`pytest -q ...`) as a log (or paste it into notes) so you can compare runs.
-* Keep “run records” short: enough to reproduce the run in < 1 minute.
-
-**Prompt Card template:**
-```text
-Prompt ID:
-Model:
-Target:
-Prompt (saved):
-Command:
-Artifacts:
-Result summary:
-Notes:
-```
-
-**Good Example:**
+**Example:**  
 ```text
 Prompt ID: D2_graph_semantics_v1
-Model: Copilot CLI gpt-5-mini (2026-02-27)
-Target: ProblemD/student/src/mini_autograd.py::Tensor.backward (graph semantics)
-Prompt (saved): exact prompt text captured for reruns
-Command: pytest -q <generated_test_file>
-Artifacts: <generated_test_file>; <pytest_log>
-Result: 2 passed, 4 failed (useful failing signals)
+Model: Copilot CLI gpt-5-mini
+Environment: macOS / local repo / pytest
+Timestamp: 2026-03-27 14:05
+Target: ProblemD/student/src/mini_autograd.py::Tensor.backward
+Required edge cases: explicit upstream grad, shared subgraphs, repeated backward, leaf/non-leaf gradients
+Prompt (saved): prompt_D2_graph_semantics_v1.txt
+Command: pytest -q test_problem_d_graph.py
+Artifacts: test_problem_d_graph.py; pytest_D2_graph_semantics_v1.log
+Result summary: 2 passed, 4 failed
 ```
 
-**Bad Example:**
-```text
-I generated tests yesterday; I don’t remember the prompt or model version.
-```
-
-#### Problem D Showcase (D_1, D_4)
-In Problem D, we got more runnable and comparable outputs by pinning the output contract and imports, and by recording a minimal run record (prompt + command + result summary).
-
-```text
-Output contract:
-- return one runnable Python pytest file only (no prose / no markdown fences)
-
-Use these imports (exactly):
-from ProblemD.student.src.mini_autograd import Tensor, Function
-from ProblemD.student.src import demo_custom_functions as custom
-
-Run record (fill during the run):
-Prompt ID: <short name>
-Model: <model + version>
-Target: mini_autograd.py and/or demo_custom_functions.py
-Prompt (saved): <exact prompt text captured>
-Command: pytest -q <generated_test_file>
-Result summary: <X passed, Y failed>
-```
-
-**Why it helped:** it reduced “non-runnable” generations (wrong imports/prose output) and made baseline vs guided comparisons reproducible.
+Problem D is a good fit for this guideline because the same testing task can produce different outputs depending on prompt wording, imports, and model settings; a short run record makes those differences auditable.
 
 ---
 
-### Guideline 7: Counterexample-First Prompting to Generate Discriminative Tests
+### Guideline 7: Counterexample-First Prompting with an Explicit Execution Path
 **Description:**  
-Before generating final tests, first ask the model to propose plausible wrong variants and minimal counterexamples. Then generate tests that pass for the intended contract and would fail for each wrong variant.
+Before generating final tests, first ask the model to propose plausible failure modes or adversarial inputs and minimal counterexamples. Then generate tests that pass for the intended contract and would fail for each failure mode. When the target code has a pipeline or multiple calls, name the exact execution path to inspect rather than saying only “trace from the entry point.” The execution path should include the relevant call sequence and any important dependencies or helper functions that shape the behavior.
 
 **Reasoning:**  
-Counterexample-first prompts force the model to surface discriminators and reduce tests that accidentally pass buggy implementations. This matches findings that LLM-generated tests can be shallow/misaligned and that prompt structure affects test effectiveness [1], [2], [5]. This is especially useful when multiple near-correct variants exist (e.g., correct forward but wrong backward order).
+Counterexample-first prompts force the model to surface discriminators and reduce tests that accidentally pass buggy implementations. This matches findings that LLM-generated tests can be shallow or misaligned and that prompt structure affects test effectiveness [1], [2], [5]. Explicit execution paths help when the bug depends on state flowing through more than one step.
 
-**How to apply (2-step sequence):**
-1. **Enumerate wrong variants + counterexamples** (no test code yet). Ask for a short table: `wrong_variant | symptom | minimal inputs`.
-2. **Generate tests from that table.** Require one test per wrong variant, each tagged with the variant it targets.
-
-**Counterexample-first prompt (copy/paste):**
+**Example:**  
 ```text
 You are helping me write discriminative pytest unit tests.
 
-Target: <FUNCTION or METHOD>.
-Contract summary: <1–5 bullets>.
+Target: Tensor.backward
+Execution path: Tensor.backward -> parent traversal -> shared graph accumulation -> leaf gradient updates
+Important dependencies: local gradient rules in mini_autograd.py and custom ops in demo_custom_functions.py
+Contract summary:
+- explicit upstream gradients must be respected
+- repeated use of the same tensor must accumulate gradients
+- leaf gradients must reflect the full chain rule
 
-Task: list 4–6 plausible wrong variants that are easy to accidentally implement.
-For each wrong variant, provide the smallest counterexample inputs that would expose it.
-Return a table: wrong_variant | symptom | counterexample_inputs.
-```
+Task: list 4-6 plausible failure modes and the smallest counterexample inputs that expose them.
+Return a table: failure_mode | symptom | counterexample_inputs.
 
-**Discriminative test prompt (copy/paste):**
-```text
-Using the table above, write pytest tests such that:
-1) they pass for the intended contract, and
-2) each test would fail for its corresponding wrong_variant.
-
-Constraints:
-- Prefer minimal inputs from the table.
-- Add a comment `# targets: <wrong_variant>` per test.
-- Return code only.
-```
-
-**Good Example:**
-```text
-Step 1: List 4 plausible wrong variants and minimal counterexamples.
-Step 2: Write pytest tests that would fail for each wrong variant.
+Then write one pytest test per failure mode.
+Follow the execution path exactly.
+Add a comment `# targets: <failure_mode>` per test.
 Return code only.
 ```
 
-**Bad Example:**
-```text
-Generate tests without considering how a buggy-but-plausible implementation might still pass.
-```
-
-#### Problem D Showcase (D_2, D_3)
-In Problem D, counterexample-first prompting is a fast way to get discriminative gradient tests (small numeric inputs, strong assertions) for both graph semantics and custom ops.
-
-```text
-List wrong variants + minimal counterexamples (examples):
-- V1 (upstream grad ignored):
-  out = (Tensor(2.0, True) * 3.0); out.backward(4.0) => x.grad == 12.0
-- V2 (mul missing chain factor):
-  x=2.0,y=3.0; out=(x*y)*4.0; out.backward() => x.grad==12.0,y.grad==8.0
-- V3 (shared-subgraph not accumulated):
-  x=3.0; out=(x*x)+x; out.backward() => x.grad == 7.0
-- V4 (axpy grad order wrong):
-  a=2.0,x=3.0,y=4.0; out=axpy(a,x,y); out.backward() => (a=3,x=2,y=1)
-- V5 (clamp01 boundary derivative wrong):
-  x in {-0.25, 0.25, 1.5}; grads should be {0.0, 1.0, 0.0}
-
-Then: write one pytest test per V*, tagged `# targets: V*`, return code only.
-```
-
-**Why it helped:** it pushed the model to propose discriminators first, then encode them as assertions, reducing tests that accidentally pass buggy implementations.
+Problem D is also a strong illustrative problem here because graph-semantics bugs only show up when the prompt names the actual path through backward propagation rather than asking the model to “trace from the entry point.”
 
 ---
 
