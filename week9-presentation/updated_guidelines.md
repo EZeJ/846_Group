@@ -72,18 +72,37 @@ Generate tests for this code.
 ---
 
 ### Guideline 2: Use a Generate–Validate–Repair Loop Instead of One-Shot Generation
+
 **Description:**  
 Adopt a QA workflow where LLM-generated tests go through an automated repair loop:
-1. Generate tests
-2. Compile and run
-3. Parse failures (imports, mocks, wrong API usage, assertion mismatch)
-4. Feed specific failure feedback back to the model
-5. Regenerate/fix
-6. Re-validate
+
+1. Generate tests  
+2. Compile and run  
+3. Parse failures (imports, mocks, wrong API usage, assertion mismatch)  
+4. **Classify each failure against the specification (docstrings, requirements, API contracts):**  
+   - **(A) TEST BUG** — assertion contradicts the spec → fix the test  
+   - **(B) IMPL BUG** — assertion matches the spec but code disagrees → keep the assertion and mark with `@pytest.mark.xfail(reason="IMPL BUG: ...")`  
+   - **(C) UNCLEAR** — ambiguous spec → flag for human review  
+5. Feed specific failure feedback back to the model  
+6. **Repair under contract preservation constraints:**  
+   - Restate the intended contract explicitly  
+   - Explain root cause before modification  
+   - Do not weaken assertions  
+   - Do not introduce broad exception catching  
+   - Prefer strong assertions (e.g., `pytest.raises`)  
+7. Regenerate/fix  
+8. Re-validate  
+
 Stop after a small number of iterations and escalate to human review.
 
+---
+
 **Reasoning:**  
-A generate–validate–repair loop is more effective than  one-shot generation because test creation is an iterative quality-control task, not a single prediction task: even when generated output looks plausible, hidden issues such as incorrect assumptions, weak assertions, incompatibilities with the local codebase, or syntactic/runtime failures may remain undetected until execution and validation. Prior work shows that LLM-generated unit tests frequently suffer from compilation errors and execution/correctness issues, and that iterative refinement can improve outcomes [4], [5]. By explicitly validating the output and feeding back concrete failures, the process converts vague generation into a controlled refinement cycle, which improves reliability, reduces silent errors, and makes the final tests better aligned with actual behavior and project constraints [5].
+A generate–validate–repair loop is more effective than one-shot generation because test creation is an iterative quality-control task, not a single prediction task: even when generated output looks plausible, hidden issues such as incorrect assumptions, weak assertions, incompatibilities with the local codebase, or syntactic/runtime failures may remain undetected until execution and validation. Prior work shows that LLM-generated unit tests frequently suffer from compilation errors and execution/correctness issues, and that iterative refinement can improve outcomes [4], [5].
+
+Additionally, without constraints, repair loops may degrade test quality by weakening assertions or adapting tests to incorrect behavior. By anchoring repairs to the specification and enforcing contract preservation, the process ensures that failing tests remain useful signals of real issues rather than being silently “fixed” to pass.
+
+---
 
 **Good Example:**  
 ```
@@ -91,14 +110,21 @@ Running the tests produced these failures:
 
 [ERROR COPIED]
 
-Are these bugs in the tests or the implementation? Explain the root cause
-and return a corrected test file. Do not modify checkout_service.py.
+Classify the failure (TEST BUG / IMPL BUG / UNCLEAR).
+Explain whether the failure indicates a test bug or implementation bug.
+Do not weaken assertions or modify checkout_service.py.
+
+Return corrected pytest tests.
+
 ```
+---
 
 **Bad Example**
-* Generating tests once, seeing compile errors, and discarding AI testing entirely.
-* Re-prompting with “fix it” but without providing concrete error messages.
-* Running infinite regeneration loops until something passes by chance.
+
+- Generating tests once, seeing compile errors, and discarding AI testing entirely  
+- Re-prompting with “fix it” but without providing concrete error messages or specification  
+- Weakening assertions or adding broad exception handling to make tests pass  
+- Running infinite regeneration loops until something passes by chance  
 
 ---
 
