@@ -12,10 +12,18 @@
 Use the GPT-4 model for this problem.
 
 **Task Description:**
-You have a checkout service module for an online store. This service handles item-level discounts (flash sales, bundle deals), three distinct coupon types (`SAVE10`, `SUMMER20`, `FLASH5`), a loyalty-points redemption system, shipping cost rules, tax calculation, and payment processing. You need to create unit tests that uncover if the implementation has any bugs.
+You are testing the checkout system of an online store (CheckoutService.process_checkout). This service calculates the final order totals by applying several rules in order: item-level discounts, coupon codes (SAVE10, SUMMER20, FLASH5), loyalty point redemptions, shipping fees, taxes, and payment processing. Each rule can interact, which can lead to small bugs, especially around thresholds and compatibility.
+
+Your task is to write pytest unit tests that identify these bugs. Your tests should thoroughly cover each individual rule and include pipeline integration tests to ensure consistent results across steps. Follow the public contract provided, not just the current behavior of the code, and suggest additional edge cases that are not explicitly listed.
 
 **Starter Code:**
 See `checkout_service.py` in the `problem_A` folder.
+
+**Required Workflow:**
+* Summarize expected checkout behavior.
+* Propose at least 5 extra edge cases beyond those listed.
+* Identify implementation mismatches.
+* Write final pytest tests.
 
 ---
 
