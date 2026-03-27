@@ -258,12 +258,14 @@ Step 2: Generate focused tests for each behavior.
 ```
 
 ---
+
+
 ### Guideline 5: Ground the Fault Model in the Trusted Spec Before Using It to Drive Test Adequacy
 **Description:**  
-Do not ask an LLM for “more tests” from a fault model alone. First ground testing in a trusted specification: the intended behavior, public contract, README, or worked examples. Then build a fault model using only plausible deviations from that spec. Require at least one test per fault item, and reject any expected result that is not supported by the specification.
+Do not ask an LLM for “more tests” from a fault model alone. First state the trusted specification: the intended behavior, public contract, README, or worked examples. Then build a fault model using only plausible deviations from that spec. Require each fault item to cite the spec clause it threatens, and reject any expected result that is not justified by the specification.
 
 **Reasoning:**  
-A fault model is useful only if it refines the real contract rather than replacing it. Without a trusted spec, the model can invent alternate meanings of the function and produce tests that look rigorous but assert the wrong behavior. Grounding the fault model in the spec keeps mutation-style testing focused on real defect-revealing behavior instead of fabricated semantics [1], [2], [5], [6].
+A fault model is useful only if it sharpens the real contract instead of replacing it. Without a trusted spec, the model can invent alternate meanings of the function and produce tests that look rigorous but assert the wrong behavior. Grounding the fault model in the spec keeps adequacy arguments tied to real obligations instead of speculative behavior [1], [2], [5], [6].
 
 **Example:**  
 ```text
@@ -273,17 +275,14 @@ Trusted spec:
 - if value > hi, return hi
 - otherwise return value
 
-Fault model:
-- FM1: above-upper-bound values are returned unchanged instead of clamped to hi
-- FM2: below-lower-bound values are returned unchanged instead of clamped to lo
-- FM3: boundary value value == lo is mishandled
-- FM4: boundary value value == hi is mishandled
-- FM5: in-range values are incorrectly replaced by a bound
+Build a fault model table with columns:
+spec_clause | plausible_fault | required_test_obligation
 
-Requirements:
-- each FM must map to the trusted spec above
-- each test must include an assertion justified by the spec
-- add `# targets: FM*` in each test
+Constraints:
+- every plausible_fault must trace back to one spec_clause above
+- do not invent new semantics for clamp
+- each generated test must include a comment `# targets: <spec_clause>`
+- each assertion must be justified by the trusted spec
 - return code only
 ```
 
@@ -291,7 +290,7 @@ Problem D is still a useful illustrative problem for this guideline because the 
 
 ---
 
-### Guideline 6: Use a Prompt Card + Run Record, Including Edge Cases
+### Guideline 6: Use a Prompt Card + Run Record for Reproducibility
 **Description:**  
 For every AI-assisted test run, record:
 * model name + version,
@@ -299,13 +298,12 @@ For every AI-assisted test run, record:
 * environment and timestamp, including random seeds or other nondeterminism settings when applicable,
 * prompt ID + exact prompt (or prompt-file path),
 * target task or code under test,
-* required edge cases and acceptance criteria,
 * run command,
 * generated artifact paths,
 * 1-line outcome summary.
 
 **Reasoning:**  
-Small prompt and context changes can materially change generated tests. Tooling guidance encourages prompt files and repository instructions to make outcomes reproducible and comparable across a team [9], [10]. Listing the edge cases up front makes the run record useful for debugging, not just bookkeeping.
+Small prompt and context changes can materially change generated tests. Tooling guidance encourages prompt files and repository instructions so outcomes are reproducible and comparable across a team [9], [10]. A concise run record turns “the model gave me something different” into an auditable difference in prompt, environment, or execution setup.
 
 **Example:**  
 ```text
@@ -314,23 +312,22 @@ Model: Copilot CLI gpt-5-mini
 Environment: macOS / local repo / pytest
 Timestamp: 2026-03-27 14:05
 Target: ProblemD/student/src/mini_autograd.py::Tensor.backward
-Required edge cases: explicit upstream grad, shared subgraphs, repeated backward, leaf/non-leaf gradients
 Prompt (saved): prompt_D2_graph_semantics_v1.txt
 Command: pytest -q test_problem_d_graph.py
 Artifacts: test_problem_d_graph.py; pytest_D2_graph_semantics_v1.log
 Result summary: 2 passed, 4 failed
 ```
 
-Problem D is a good fit for this guideline because the same testing task can produce different outputs depending on prompt wording, imports, and model settings; a short run record makes those differences auditable.
+Problem D is a good fit for this guideline because the same testing task can produce different outputs depending on prompt wording, imports, and model settings; a short run record makes those differences auditable and repeatable.
 
 ---
 
-### Guideline 7: Counterexample-First Prompting with an Explicit Execution Path
+### Guideline 7: Use Motif-First Discriminators Instead of Generic Edge-Case Lists
 **Description:**  
-Before generating final tests, first ask the model to propose plausible failure modes or adversarial inputs and minimal counterexamples. Then generate tests that pass for the intended contract and would fail for each failure mode. When the target code has a pipeline or multiple calls, name the exact execution path to inspect rather than saying only “trace from the entry point.” The execution path should include the relevant call sequence and any important dependencies or helper functions that shape the behavior.
+When generating tests for complex behavior, ask the model for a small set of structural motifs that each expose one plausible bug class. A motif is a minimal construction pattern, not just an input value. For each motif, require the prompt to name the bug it is meant to discriminate, the exact execution path involved, and the assertion that should distinguish the correct implementation from a near-correct one.
 
 **Reasoning:**  
-Counterexample-first prompts force the model to surface discriminators and reduce tests that accidentally pass buggy implementations. This matches findings that LLM-generated tests can be shallow or misaligned and that prompt structure affects test effectiveness [1], [2], [5]. Explicit execution paths help when the bug depends on state flowing through more than one step.
+Generic prompts for “more edge cases” often produce shallow variations of the same test. Motif-first prompting pushes the model toward bug-revealing structures and makes each test justify why it exists. This better targets near-correct implementations and reduces prompts that only restate the contract without isolating a defect-revealing pattern [1], [2], [5].
 
 **Example:**  
 ```text
@@ -344,18 +341,24 @@ Contract summary:
 - repeated use of the same tensor must accumulate gradients
 - leaf gradients must reflect the full chain rule
 
-Task: list 4-6 plausible failure modes and the smallest counterexample inputs that expose them.
-Return a table: failure_mode | symptom | counterexample_inputs.
+Task: propose 4 structural motifs for this target.
+Return a table:
+motif | targeted_bug_class | minimal_construction | distinguishing_assertion
 
-Then write one pytest test per failure mode.
-Follow the execution path exactly.
-Add a comment `# targets: <failure_mode>` per test.
+Requirements:
+- each motif must be a small graph shape or execution pattern
+- avoid generic “test edge cases” wording
+- each motif must follow the execution path above
+
+Then write one pytest test per motif.
+Add a comment `# targets: <motif>` per test.
 Return code only.
 ```
 
-Problem D is also a strong illustrative problem here because graph-semantics bugs only show up when the prompt names the actual path through backward propagation rather than asking the model to “trace from the entry point.”
+Problem D is a strong illustrative problem here because graph-semantics bugs are often exposed by the right small structure or execution motif, not by asking the model for a generic list of edge cases.
 
 ---
+
 
 ## 2. References
 
