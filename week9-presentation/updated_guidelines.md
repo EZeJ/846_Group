@@ -27,41 +27,65 @@
 
 ## 1. Guidelines for Testing
 
-### Guideline 1: Specify the Testing Goal and Scope in the Prompt
+### Guideline 1: Specify the Testing Goal, Scope, and Important Behavioral Properties in the Prompt
 **Description:**  
-When asking an LLM to generate or improve tests, explicitly state:
-* test level (unit / integration / API / E2E),
-* target function/module,
-* expected behavior,
-* constraints (framework, style, mocks, side effects),
-* what not to test
+When prompting an LLM for test generation, explicitly state:
+* Test type (unit/integration/API/E2E)
+* Target function/module
+* Expected behavior (public contract)
+* Constraints (framework, mocks, style)
+* Exclusions (what not to test)
+* Critical properties if relevant (performance, precision, concurrency)
+* Required coverage of edge cases and strong assertions
+* Request additional model-proposed edge cases
+* For sequential logic, require integration tests to verify cross-step consistency
+
+For domain-heavy code, follow this workflow:
+1. Summarize expected behavior from the domain
+2. Identify mismatches between code and behavior
+3. Generate final tests
 
 **Reasoning:**  
-Clear scope reduces ambiguity, so the model produces more relevant and accurate tests instead of generic or off-target output. LLM testing results depend heavily on prompt quality/prompt engineering and that prompt design [6].
+Clear scope reduces ambiguity. However, a narrow checklist can make the model too obedient. It may just replicate the implementation or confirm only the mistakes already identified. Including important behavior traits stops the prompt from concentrating solely on happy-path correctness. Requesting additional edge cases proposed by the model makes it behave more like a test designer rather than a test typist. It is crucial to require pipeline integration tests for sequential business logic. In this context, a bug may only show up when one computed value influences later ones.
 
 **Good Example:**
 ```
-Generate pytest unit tests for `CheckoutService.process_checkout` in `checkout_service.py`.
+Generate pytest tests for `CheckoutService.process_checkout` in `checkout_service.py`.
 
+Test level: unit tests plus a small number of integration-style pipeline tests around `process_checkout`.
 Framework: pytest + `unittest.mock.MagicMock` for `InventoryService` and `PaymentGateway`.
-Use `@pytest.mark.parametrize` for boundary values. Use `pytest.raises(CheckoutError)` for all error paths.
+Use `@pytest.mark.parametrize` for boundaries.
+Use `pytest.raises(CheckoutError)` for error paths.
 Do NOT test the external dependencies themselves.
 
-Cover each rule with at least one test:
+Use the public contract below as the source of truth even if the implementation disagrees with it.
 
+Before writing the final test file:
+1. Briefly list the expected behavior of a checkout service like this.
+2. Propose at least 5 additional edge cases or failure modes beyond the ones I listed.
+3. Inspect the code and identify likely mismatches with the contract.
+4. Then write the final tests.
+
+Cover these business rules:
 - Empty cart -> CheckoutError
-- Stock check: error when out of stock, success when in stock
-- Flash-sale discount (5%), bundle discount (quantity >= 3, 5%)
-- SAVE10 (10%, min $100), SUMMER20 (20% capped at $30, min $75), FLASH5 (5% on flash items)
-- VIP discount (15%) incompatible with all coupons; FLASH5 incompatible with VIP
-- Loyalty credit applied only when points >= 500
-- Shipping: $10 if discounted subtotal < $50, else $0
-- Tax: 13% on post-discount, post-loyalty-credit amount
+- Out-of-stock item -> CheckoutError
+- Bundle discount applies when quantity >= 3
+- SAVE10, SUMMER20, FLASH5 rules
+- VIP cannot be combined with any coupon
+- Loyalty credit applies only when eligible
+- Shipping depends on discounted subtotal
+- Tax depends on post-discount, post-loyalty amount
 - Payment failure -> CheckoutError
 - Total must never be negative
 
-Parametrize: quantity in {2,3,4}; subtotal at $74.99/$75/$99.99/$100; shipping boundary at $49.99/$50/$50.01.
-State any assumptions as inline comments. Return only the test file.
+Include at least 4 pipeline integration tests that verify:
+- discounts can change whether shipping is free,
+- loyalty credit changes the tax base,
+- the amount passed to `payment.charge()` matches the returned total,
+- incompatible discount combinations do not return a success result.
+
+Use strong assertions on returned fields and mock call arguments.
+Return only the test file.
 ```
 
 **Bad Example:** 
@@ -102,7 +126,7 @@ and return a corrected test file. Do not modify checkout_service.py.
 
 ---
 
-### Guideline 3: Explicitly Request Boundary and Negative Cases, Strong Assertions — Aligned with the Code's Contract
+### Guideline 3: Explicitly Request Boundary and Negative Cases, Strong Assertions - Aligned with the Code's Contract
 
 **Description:**
 
@@ -113,24 +137,22 @@ When asking an LLM to generate tests, explicitly require categories of non-happy
 - **Invalid formats:** malformed JSON/CSV, invalid dates, illegal enum values, wrong encoding
 - **Exception/error paths:** inputs that must trigger validation failures or thrown exceptions (use `pytest.raises` or equivalent)
 - **Invariant/property checks:** conditions that must always hold regardless of input
-- **Strong assertions:** verify exact expected outputs, state changes, and side effects — not just "test runs without crashing"
+- **Strong assertions:** verify exact expected outputs, state changes, and side effects - not just "test runs without crashing"
 
-**Critical addition:** Only request edge-case categories that the code is actually designed to handle. Before listing categories, review the function's documented contract or spec. If the code does not validate a certain input (e.g., `None` owner, negative initial balance), do not generate tests asserting behavior for that case — these become false alarms and obscure real coverage gaps.
+**Critical addition:** Only request edge-case categories that the code is actually designed to handle. Before listing categories, review the function's documented contract or spec. If the code does not validate a certain input (e.g., `None` owner, negative initial balance), do not generate tests asserting behavior for that case - these become false alarms and obscure real coverage gaps.
 
 Additionally, generic category labels (null, boundary) are a starting point only. For each function, also consider **domain-specific weird inputs** that the generic list does not cover: Unicode characters, `NaN`/`inf` floats, floating-point precision quirks, locale-sensitive formats, idempotency under repeated application, and similar domain-relevant edge cases.
 
 **Reasoning:**
 
-LLMs default to happy-path tests and rarely invent the extreme or domain-specific inputs that trigger validation errors and exception branches [2][5]. Explicitly requesting categories forces coverage. However, if categories are applied without checking the code's contract, the LLM generates tests for non-existent validation logic, producing false failures that waste debugging time. Student work showed that for a bank module with no input validation, applying the original guideline produced four failing tests asserting behavior the code never claimed to have — the tests were wrong, not the code. The same work showed that domain-specific edge cases (Unicode normalization, `NaN`/`inf`, sign of `-0.0`, float rounding) must be named explicitly to be covered; the LLM will not invent them from a generic category label.
+LLMs typically focus on basic tests and rarely generate extreme or specific inputs that uncover validation errors and exception branches [2][5]. Asking for specific categories can ensure broader test coverage. However, if categories are used without verifying the code's contract, the LLM creates tests for validation logic that doesn’t exist. This results in false failures, wasting time in debugging. Student work demonstrated that for a bank module lacking input validation, following the original guideline led to four failing tests that claimed behaviors the code never stated-these tests were wrong, not the code. This work also found that specific edge cases, like Unicode normalization, `NaN`/`inf`, the sign of `-0.0`, and float rounding, need to be named directly to be included. The LLM will not create them from a general category label.
 
-**Example:**
-
-**Good:**
+**Good Example:**
 ```
 Generate pytest tests for `calculate_discount(price, discount_pct)` in `example.py`.
 
 Contract (from docstring): discount_pct must be in [0, 100]; raises ValueError otherwise.
-price has no documented validation — do NOT invent tests for invalid price types.
+price has no documented validation - do NOT invent tests for invalid price types.
 
 Required categories (aligned with contract):
 1. Boundary: discount_pct = 0 and 100 exactly; off-by-one values -1 and 101
@@ -140,23 +162,21 @@ Use @pytest.mark.parametrize. Strong assertions on every test.
 Return one runnable pytest file only.
 ```
 
-**Bad:**
+**Bad Example:**
 ```
 Write tests for calculate_discount. Cover null inputs, boundary values, and exception paths.
 ```
 
 ---
-* The description was improved by refining my thoughts and structure in GitHub Copilot.
----
 
-### Guideline 4: Decompose Complex Methods Before Asking for Tests — Match Structure to Complexity, Then Add Pipeline Integration Tests
+### Guideline 4: Decompose Complex Methods Before Asking for Tests - Match Structure to Complexity, Then Add Pipeline Integration Tests
 
 **Description:**
 
 Before decomposing, assess whether the method genuinely has multiple distinct responsibilities.
 
 **Single-responsibility code** (one clear behavior, no distinct steps):
-Do **not** decompose. Just ask for focused tests with boundary and negative cases (Guideline 3). If you ask the LLM to "list distinct behaviors" on simple code, it will invent them — and miss the real bugs.
+Do **not** decompose. Just ask for focused tests with boundary and negative cases (Guideline 3). If you ask the LLM to "list distinct behaviors" on simple code, it will invent them - and miss the real bugs.
 
 **Rule of thumb:** If you cannot write 2–3 distinct sentences describing what the method does, skip decomposition.
 
@@ -171,11 +191,11 @@ Apply three steps:
 
 **Reasoning:**
 
-We found two problems with the original guideline. First, it does not say when *not* to decompose. If you ask the model to list distinct behaviors for a simple function, it will invent them. It creates fake sub-behaviors, adds tests for inputs the function never handles, and misses the actual bugs. Second, decomposition alone is not enough for multi-step methods. In multiple problems, all unit tests passed but the bug was still there — because it lived between steps, not inside one. These bugs only showed up when we tested the steps running together [1].
+We found two problems with the original guideline. First, it does not say when *not* to decompose. If you ask the model to list distinct behaviors for a simple function, it will invent them. It creates fake sub-behaviors, adds tests for inputs the function never handles, and misses the actual bugs. Second, decomposition alone is not enough for multi-step methods. In multiple problems, all unit tests passed but the bug was still there - because it lived between steps, not inside one. These bugs only showed up when we tested the steps running together [1].
 
 **Example:**
 
-**Good (multi-responsibility — apply decomposition + pipeline integration):**
+**Good (multi-responsibility: apply decomposition + pipeline integration):**
 ```
 Here is `process_reorder(...)` with six sequential steps:
   1. Reorder decision
@@ -194,24 +214,23 @@ Step 3: Generate integration tests that run steps together.
 - Add a test where safety-stock (Step 5) bumps the quantity, and assert that
   cost fields (Step 4) and approval flag (Step 6) reflect the new quantity.
 - Add a test where a discount changes an intermediate value that a later step
-  uses as a threshold — assert the later step uses the updated value.
+  uses as a threshold - assert the later step uses the updated value.
 
 Constraints: do not modify source code.
 ```
 
-**Bad (single-responsibility — do not decompose):**
+**Bad (single-responsibility: do not decompose):**
 ```
 List the distinct behaviors in clamp(value, lo, hi) and generate separate test groups for each.
 ```
 
-**Bad (multi-responsibility — decomposition without integration):**
+**Bad (multi-responsibility: decomposition without integration):**
 ```
 Here is process_order(db, order).
 Step 1: List the distinct behaviors.
 Step 2: Generate focused tests for each behavior.
 ```
----
-* The description was improved by refining my thoughts and structure in GitHub Copilot.
+
 ---
 
 ### Guideline 5: Use a Fault Model (Mutation Mindset) to Drive Test Adequacy
